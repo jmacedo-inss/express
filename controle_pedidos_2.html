@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Pedidos de Peças</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+#pedidosApp, #pedidosApp * { box-sizing: border-box; }
+
+#pedidosApp {
+  --bg:#EEF2F8;
+  --bg-rgb:238,242,248;
+  --bg-2:#E6ECF5;
+  --panel:#FFFFFF;
+  --panel-2:#F5F8FC;
+  --panel-3:#EDF1F8;
+  --border:#DCE4F0;
+  --border-soft:#E6ECF5;
+  --text:#101827;
+  --text-dim:#586376;
+  --text-faint:#8994A8;
+  --accent:#2E4B95;
+  --accent-rgb:46,75,149;
+  --accent-ink:#FFFFFF;
+  --accent-dim:rgba(46,75,149,0.10);
+  --accent-2:#2F6FED;
+  --accent-2-dim:rgba(47,111,237,0.10);
+  --good:#0EA37E;
+  --good-ink:#FFFFFF;
+  --good-dim:rgba(14,163,126,0.10);
+  --warn:#C97A0B;
+  --warn-ink:#FFFFFF;
+  --warn-dim:rgba(201,122,11,0.10);
+  --danger:#E23B4C;
+  --danger-ink:#FFFFFF;
+  --danger-dim:rgba(226,59,76,0.10);
+  --neutral:#8994A8;
+  --neutral-dim:rgba(137,148,168,0.12);
+  --radius:0.85em;
+  --shadow: 0 1em 2.2em rgba(20,30,60,0.10), 0 0.2em 0.4em rgba(20,30,60,0.06);
+  --font-display:'Outfit', sans-serif;
+  --font-body:'Manrope', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  position: relative;
+  min-height: 100vh;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(circle at 1px 1px, var(--border-soft) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+#pedidosApp .bg-glow { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+#pedidosApp .bg-glow span { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .22; }
+#pedidosApp .bg-glow .g1 { width: 28em; height: 28em; background: var(--accent); top: -12em; right: -8em; }
+#pedidosApp .bg-glow .g2 { width: 22em; height: 22em; background: var(--accent-2); bottom: -10em; left: -6em; opacity: .16; }
+
+/* ---------- Topbar ---------- */
+#pedidosApp .topbar {
+  position: sticky; top: 0; z-index: 30;
+  display:flex; align-items:center; justify-content:space-between; gap:1em;
+  padding: 0.7em 1.2em;
+  background: rgba(var(--bg-rgb), 0.86);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+#pedidosApp .brand { display:flex; align-items:center; gap:0.8em; min-width:0; }
+#pedidosApp .logo-chip {
+  height: 2.6em; width: 2.6em; border-radius: 0.65em; background: var(--panel-2); border: 1px solid var(--border);
+  box-shadow: var(--shadow); flex-shrink:0; display:flex; align-items:center; justify-content:center;
+}
+#pedidosApp .logo-chip svg { width: 1.5em; height: 1.5em; color: var(--accent); }
+#pedidosApp .brand-text { display:flex; flex-direction:column; min-width:0; }
+#pedidosApp .brand-title { font-family: var(--font-display); font-weight:700; font-size: 1.05em; letter-spacing:0.01em; white-space:nowrap; }
+#pedidosApp .brand-sub { font-size: 0.74em; color: var(--accent); font-weight:600; white-space:nowrap; letter-spacing:0.02em; }
+#pedidosApp .topbar-actions { display:flex; gap:0.5em; flex-shrink:0; }
+#pedidosApp .icon-btn {
+  width: 2.3em; height: 2.3em; border-radius: 0.65em; background: var(--panel); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; font-size: 1em; cursor:pointer; color:var(--text);
+  transition: transform .15s ease, border-color .15s ease;
+}
+#pedidosApp .icon-btn svg { width: 1.2em; height: 1.2em; }
+#pedidosApp .icon-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+#pedidosApp .icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#pedidosApp .wrap { position: relative; z-index: 1; max-width: 100em; margin: 0 auto; padding: 1em 1.2em 2.4em; }
+
+/* ---------- Status summary strip ---------- */
+#pedidosApp .stats-row { display:grid; grid-template-columns: repeat(4, 1fr); gap: 0.75em; margin-bottom: 0.9em; }
+@media (max-width: 60em) { #pedidosApp .stats-row { grid-template-columns: repeat(2, 1fr); } }
+#pedidosApp .stat {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.75em 0.9em; box-shadow: var(--shadow);
+  display:flex; flex-direction:column; gap: 0.15em;
+}
+#pedidosApp .stat .n { font-family: var(--font-mono); font-size: 1.5em; font-weight:600; }
+#pedidosApp .stat .l { font-size: 0.72em; color: var(--text-dim); text-transform:uppercase; letter-spacing:0.03em; }
+
+/* ---------- Toolbar ---------- */
+#pedidosApp .toolbar {
+  display:flex; align-items:center; gap: 0.6em; flex-wrap: wrap;
+  background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+  padding: 0.7em 0.9em; margin-bottom: 0.9em; box-shadow: var(--shadow);
+}
+#pedidosApp .toolbar input[type="search"], #pedidosApp .toolbar select {
+  background: var(--panel-2); border:1px solid var(--border); border-radius: 0.55em;
+  padding: 0.5em 0.7em; color: var(--text); font-family: var(--font-body); font-size: 0.86em; outline:none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+#pedidosApp .toolbar input[type="search"] { flex: 1 1 14em; min-width: 10em; }
+#pedidosApp .toolbar select { flex: 0 0 auto; }
+#pedidosApp .toolbar input:focus, #pedidosApp .toolbar select:focus { border-color: var(--accent); box-shadow: 0 0 0 0.15em var(--accent-dim); }
+#pedidosApp .btn-primary {
+  margin-left: auto; padding: 0.55em 1.1em; font-family: var(--font-display); font-weight:700;
+  font-size: 0.88em; letter-spacing:0.01em; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: var(--accent-ink); border:none; border-radius: 0.65em; cursor:pointer;
+  box-shadow: 0 0.5em 1.2em rgba(var(--accent-rgb), 0.35); transition: transform .15s ease, box-shadow .15s ease;
+  display:flex; align-items:center; justify-content:center; gap:0.5em; white-space:nowrap;
+}
+#pedidosApp .btn-primary svg { width: 1.1em; height: 1.1em; flex-shrink:0; }
+#pedidosApp .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0.7em 1.5em rgba(var(--accent-rgb), 0.42); }
+
+/* ---------- Table (wide) ---------- */
+#pedidosApp .table-shell {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); overflow: hidden;
+}
+#pedidosApp .table-scroll { overflow-x: auto; }
+#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 76em; }
+#pedidosApp table.pedidos thead th {
+  position: sticky; top:0; background: var(--panel-2); z-index: 2;
+  text-align:left; font-size: 0.74em; color: var(--text-faint); text-transform: uppercase; letter-spacing:0.03em;
+  font-weight:700; padding: 0.75em 0.8em; border-bottom: 1px solid var(--border); white-space:nowrap;
+}
+#pedidosApp table.pedidos tbody td { padding: 0.65em 0.8em; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+#pedidosApp table.pedidos tbody tr:last-child td { border-bottom:none; }
+#pedidosApp table.pedidos tbody tr:hover { background: var(--panel-2); }
+#pedidosApp table.pedidos tbody td.mono { font-family: var(--font-mono); color: var(--text-dim); white-space:nowrap; }
+#pedidosApp table.pedidos tbody td.pedido-num { font-family: var(--font-mono); font-weight:600; color: var(--text); white-space:nowrap; }
+#pedidosApp table.pedidos tbody td.pecas-cell { max-width: 18em; white-space: normal; color: var(--text-dim); }
+
+#pedidosApp .badge-select {
+  border:1px solid transparent; border-radius: 0.5em; padding: 0.35em 0.55em;
+  font-family: var(--font-body); font-size: 0.82em; font-weight:700; cursor:pointer; outline:none;
+  appearance: none; -webkit-appearance:none;
+  background-repeat: no-repeat; background-position: right 0.5em center; background-size: 0.7em;
+  padding-right: 1.6em;
+}
+#pedidosApp .status-Pendente { background: var(--warn-dim); border-color: var(--warn); color: var(--warn); }
+#pedidosApp .status-PedidoCriado { background: var(--accent-2-dim); border-color: var(--accent-2); color: var(--accent-2); }
+#pedidosApp .status-QACriado { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+#pedidosApp .status-PecasEntregues { background: var(--good-dim); border-color: var(--good); color: var(--good); }
+
+#pedidosApp .pag-neutro { background: var(--neutral-dim); border-color: var(--neutral); color: var(--neutral); }
+#pedidosApp .pag-NaoPago { background: var(--danger-dim); border-color: var(--danger); color: var(--danger); }
+#pedidosApp .pag-Parcial { background: var(--warn-dim); border-color: var(--warn); color: var(--warn); }
+#pedidosApp .pag-Pago { background: var(--good-dim); border-color: var(--good); color: var(--good); }
+
+#pedidosApp .row-actions { display:flex; gap: 0.4em; }
+#pedidosApp .row-actions button {
+  width: 2em; height: 2em; border-radius: 0.5em; background: var(--panel-2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-dim);
+  transition: border-color .15s ease, color .15s ease;
+}
+#pedidosApp .row-actions button svg { width: 1.05em; height: 1.05em; }
+#pedidosApp .row-actions button:hover { border-color: var(--accent); color: var(--accent); }
+#pedidosApp .row-actions button.del:hover { border-color: var(--danger); color: var(--danger); }
+
+#pedidosApp .empty-state { padding: 3em 1em; text-align:center; color: var(--text-faint); }
+#pedidosApp .empty-state svg { width: 2.4em; height: 2.4em; margin-bottom: 0.6em; opacity: 0.5; }
+
+/* ---------- Modal ---------- */
+#pedidosApp .modal-overlay { position: fixed; inset:0; background: rgba(4,8,16,0.65); backdrop-filter: blur(3px); display:flex; align-items:center; justify-content:center; z-index: 50; padding:1.2em; opacity:0; visibility:hidden; pointer-events:none; transition: opacity .22s ease, visibility .22s ease; }
+#pedidosApp .modal-overlay.open { opacity:1; visibility:visible; pointer-events:auto; }
+#pedidosApp .modal { background: var(--panel); border:1px solid var(--border); border-radius: 1em; padding: 1.5em; width: 100%; max-width: 34em; max-height: 88vh; overflow-y:auto; box-shadow: var(--shadow); position:relative; transform: translateY(10px) scale(0.98); transition: transform .24s cubic-bezier(.2,.9,.3,1.2); }
+#pedidosApp .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+#pedidosApp .modal-close { position:absolute; top:0.9em; right:0.9em; width:1.9em; height:1.9em; border-radius:0.5em; background: var(--panel-2); border:1px solid var(--border); color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+#pedidosApp .modal-close svg { width: 1em; height: 1em; }
+#pedidosApp .modal h3 { font-family: var(--font-display); margin: 0 0 1em; font-size:1.1em; display:flex; align-items:center; gap:0.5em; }
+#pedidosApp .modal h3 svg { width: 1.2em; height: 1.2em; flex-shrink:0; color: var(--accent); }
+#pedidosApp .field { margin: 0 0 0.8em; }
+#pedidosApp .field label { display:block; font-size: 0.7em; font-weight:700; color: var(--text-dim); text-transform:uppercase; letter-spacing:0.03em; margin-bottom: 0.35em; }
+#pedidosApp .field-grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 0 0.7em; }
+#pedidosApp input[type="text"], #pedidosApp input[type="date"], #pedidosApp select, #pedidosApp textarea {
+  width: 100%; background: var(--panel-2); border:1px solid var(--border); border-radius: 0.55em;
+  padding: 0.5em 0.65em; color: var(--text); font-family: var(--font-body); font-size: 0.88em; outline:none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+#pedidosApp textarea { resize: vertical; min-height: 3.6em; }
+#pedidosApp input:focus, #pedidosApp select:focus, #pedidosApp textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 0.15em var(--accent-dim); }
+#pedidosApp .modal-actions { display:flex; gap:0.6em; margin-top:1.1em; }
+#pedidosApp .btn-ghost, #pedidosApp .btn-confirm { flex:1; padding:0.65em; border-radius:0.6em; font-weight:700; font-size:0.85em; cursor:pointer; border:1px solid var(--border); font-family: var(--font-display); transition: background-color .15s ease, border-color .15s ease, transform .15s ease, opacity .15s ease; }
+#pedidosApp .btn-ghost { background: var(--panel-2); color: var(--text); }
+#pedidosApp .btn-ghost:hover { border-color: var(--danger); color: var(--danger); }
+#pedidosApp .btn-confirm { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--accent-ink); border-color: transparent; }
+#pedidosApp .btn-confirm:hover { transform: translateY(-1px); }
+#pedidosApp .form-error { color: var(--danger); font-size:0.8em; margin-top:0.5em; min-height:1.1em; }
+
+#pedidosApp .toast {
+  position: fixed; bottom: 1.5em; right: 1.5em; z-index: 60;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 0.65em;
+  padding: 0.75em 1.1em; box-shadow: var(--shadow); font-size: 0.85em;
+  display:flex; align-items:center; gap:0.6em;
+  transform: translateY(1em); opacity:0; pointer-events:none; transition: transform .2s ease, opacity .2s ease;
+}
+#pedidosApp .toast.show { transform: translateY(0); opacity:1; }
+#pedidosApp .toast.err { border-color: var(--danger); color: var(--danger); }
+#pedidosApp .toast.ok { border-color: var(--good); color: var(--good); }
+
+#pedidosApp .config-note { font-size: 0.76em; color: var(--text-faint); margin: 0.4em 0 0.9em; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div id="pedidosApp">
+  <div class="bg-glow"><span class="g1"></span><span class="g2"></span></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 12h18"></path></svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">CONTROLE DE PEDIDOS DE PEÇAS</span>
+        <span class="brand-sub" id="statusLabel">Conectando…</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="btnRefresh" title="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+      <button class="icon-btn" id="btnConfig" title="Configurar URL da API"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <section class="stats-row">
+      <div class="stat"><span class="n" id="statTotal">0</span><span class="l">Total de pedidos</span></div>
+      <div class="stat"><span class="n" id="statPendente">0</span><span class="l">Pendentes</span></div>
+      <div class="stat"><span class="n" id="statAndamento">0</span><span class="l">Em andamento</span></div>
+      <div class="stat"><span class="n" id="statEntregue">0</span><span class="l">Peças entregues</span></div>
+    </section>
+
+    <section class="toolbar">
+      <input type="search" id="filtroBusca" placeholder="Buscar por cliente, pedido, modelo/SKU…">
+      <select id="filtroTipo">
+        <option value="">Todos os tipos</option>
+        <option value="Tablet">Tablet</option>
+        <option value="Celular">Celular</option>
+        <option value="Fones">Fones</option>
+        <option value="Relógio">Relógio</option>
+      </select>
+      <select id="filtroStatus">
+        <option value="">Todos os status</option>
+        <option value="Pendente">Pendente</option>
+        <option value="Pedido criado">Pedido criado</option>
+        <option value="Q&A Criado">Q&amp;A Criado</option>
+        <option value="Peças entregues">Peças entregues</option>
+      </select>
+      <select id="filtroPagamento">
+        <option value="">Todos os pagamentos</option>
+        <option value="---">---</option>
+        <option value="Não pago">Não pago</option>
+        <option value="Pago parcialmente">Pago parcialmente</option>
+        <option value="Pago">Pago</option>
+      </select>
+      <button class="btn-primary" id="btnNovo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Novo Pedido</button>
+    </section>
+
+    <section class="table-shell">
+      <div class="table-scroll">
+        <table class="pedidos">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Cód. Cliente</th>
+              <th>Tipo de produto</th>
+              <th>Modelo/SKU</th>
+              <th>Peças</th>
+              <th>Garantia</th>
+              <th>Pedido</th>
+              <th>Status</th>
+              <th>Pagamento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="emptyState" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <div>Nenhum pedido encontrado.</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Modal: novo/editar pedido -->
+  <div class="modal-overlay" id="modalPedido">
+    <div class="modal">
+      <button class="modal-close" id="fecharModalPedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span id="modalTitulo">Novo Pedido</span></h3>
+
+      <div class="field-grid-2">
+        <div class="field"><label for="fData">Data</label><input type="date" id="fData"></div>
+        <div class="field"><label for="fCliente">Cód. Cliente</label><input type="text" id="fCliente" placeholder="Ex: CL-0234"></div>
+      </div>
+      <div class="field-grid-2">
+        <div class="field">
+          <label for="fTipo">Tipo de produto</label>
+          <select id="fTipo">
+            <option value="Tablet">Tablet</option>
+            <option value="Celular">Celular</option>
+            <option value="Fones">Fones</option>
+            <option value="Relógio">Relógio</option>
+          </select>
+        </div>
+        <div class="field"><label for="fSku">Modelo/SKU</label><input type="text" id="fSku" placeholder="Ex: SM-X710"></div>
+      </div>
+      <div class="field"><label for="fPecas">Peças</label><textarea id="fPecas" placeholder="Ex: Tela, bateria…"></textarea></div>
+      <div class="field-grid-2">
+        <div class="field"><label for="fGarantia">Garantia</label><input type="text" id="fGarantia" placeholder="Ex: Sim / Não / 90 dias"></div>
+        <div class="field"><label for="fPedido">Nº do Pedido</label><input type="text" id="fPedido" placeholder="Ex: PD-10234"></div>
+      </div>
+      <div class="field-grid-2">
+        <div class="field">
+          <label for="fStatus">Status</label>
+          <select id="fStatus">
+            <option value="Pendente">Pendente</option>
+            <option value="Pedido criado">Pedido criado</option>
+            <option value="Q&A Criado">Q&amp;A Criado</option>
+            <option value="Peças entregues">Peças entregues</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fPagamento">Pagamento</label>
+          <select id="fPagamento">
+            <option value="---">---</option>
+            <option value="Não pago">Não pago</option>
+            <option value="Pago parcialmente">Pago parcialmente</option>
+            <option value="Pago">Pago</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-error" id="formErro"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelarPedido">Cancelar</button>
+        <button class="btn-confirm" id="salvarPedido">Salvar Pedido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: configurar API -->
+  <div class="modal-overlay" id="modalConfig">
+    <div class="modal">
+      <button class="modal-close" id="fecharModalConfig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle></svg>Configurar conexão</h3>
+      <div class="config-note">Cole aqui a URL do seu Web App do Google Apps Script (termina em <b>/exec</b>). Ela fica salva apenas neste navegador.</div>
+      <div class="field"><label for="fApiUrl">URL da API</label><input type="text" id="fApiUrl" placeholder="https://script.google.com/macros/s/SEU_ID/exec"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelarConfig">Cancelar</button>
+        <button class="btn-confirm" id="salvarConfig">Salvar e Conectar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function () {
+  var STATUS_CLASS = {
+    'Pendente': 'status-Pendente',
+    'Pedido criado': 'status-PedidoCriado',
+    'Q&A Criado': 'status-QACriado',
+    'Peças entregues': 'status-PecasEntregues'
+  };
+  var PAG_CLASS = {
+    '---': 'pag-neutro',
+    'Não pago': 'pag-NaoPago',
+    'Pago parcialmente': 'pag-Parcial',
+    'Pago': 'pag-Pago'
+  };
+  var STATUS_OPCOES = ['Pendente', 'Pedido criado', 'Q&A Criado', 'Peças entregues'];
+  var PAG_OPCOES = ['---', 'Não pago', 'Pago parcialmente', 'Pago'];
+
+  var el = {};
+  ['statusLabel','btnRefresh','btnConfig','statTotal','statPendente','statAndamento','statEntregue',
+   'filtroBusca','filtroTipo','filtroStatus','filtroPagamento','btnNovo','tbody','emptyState',
+   'modalPedido','fecharModalPedido','modalTitulo','fData','fCliente','fTipo','fSku','fPecas',
+   'fGarantia','fPedido','fStatus','fPagamento','formErro','cancelarPedido','salvarPedido',
+   'modalConfig','fecharModalConfig','fApiUrl','cancelarConfig','salvarConfig','toast'
+  ].forEach(function (id) { el[id] = document.getElementById(id); });
+
+  var apiUrl = window.localStorage ? (localStorage.getItem('pedidos_api_url') || '') : '';
+  var pedidos = [];
+  var editandoId = null;
+
+  function toast(msg, tipo) {
+    el.toast.textContent = msg;
+    el.toast.className = 'toast show' + (tipo ? ' ' + tipo : '');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { el.toast.className = 'toast'; }, 3200);
+  }
+
+  function statusSlug(s) { return s.replace(/[^a-zA-Z]/g, ''); }
+
+  // -------- API --------
+  function apiGet() {
+    if (!apiUrl) { abrirModalConfig(); return Promise.resolve({ ok: false }); }
+    return fetch(apiUrl, { method: 'GET' })
+      .then(function (r) { return r.json(); })
+      .catch(function (err) { toast('Erro ao conectar: ' + err.message, 'err'); return { ok: false }; });
+  }
+
+  function apiPost(payload) {
+    if (!apiUrl) { abrirModalConfig(); return Promise.resolve({ ok: false }); }
+    return fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json(); })
+      .catch(function (err) { toast('Erro ao salvar: ' + err.message, 'err'); return { ok: false }; });
+  }
+
+  function carregar() {
+    el.statusLabel.textContent = 'Carregando pedidos…';
+    el.btnRefresh.classList.add('spinning');
+    return apiGet().then(function (res) {
+      el.btnRefresh.classList.remove('spinning');
+      if (res.ok) {
+        pedidos = res.orders || [];
+        el.statusLabel.textContent = pedidos.length + ' pedido(s) carregado(s)';
+        renderizar();
+      } else if (apiUrl) {
+        el.statusLabel.textContent = 'Falha ao conectar à planilha';
+      } else {
+        el.statusLabel.textContent = 'Configure a URL da API para começar';
+      }
+    });
+  }
+
+  // -------- Render --------
+  function renderizar() {
+    var busca = el.filtroBusca.value.trim().toLowerCase();
+    var fTipo = el.filtroTipo.value;
+    var fStatus = el.filtroStatus.value;
+    var fPag = el.filtroPagamento.value;
+
+    var filtrados = pedidos.filter(function (p) {
+      if (fTipo && p['Tipo de Produto'] !== fTipo) return false;
+      if (fStatus && p['Status'] !== fStatus) return false;
+      if (fPag && p['Pagamento'] !== fPag) return false;
+      if (busca) {
+        var alvo = [p['Cód. Cliente'], p['Pedido'], p['Modelo/SKU'], p['Peças']].join(' ').toLowerCase();
+        if (alvo.indexOf(busca) === -1) return false;
+      }
+      return true;
+    });
+
+    el.tbody.innerHTML = '';
+    el.emptyState.hidden = filtrados.length !== 0;
+
+    var totais = { Pendente: 0, andamento: 0, entregue: 0 };
+    pedidos.forEach(function (p) {
+      if (p['Status'] === 'Pendente') totais.Pendente++;
+      else if (p['Status'] === 'Peças entregues') totais.entregue++;
+      else totais.andamento++;
+    });
+    el.statTotal.textContent = pedidos.length;
+    el.statPendente.textContent = totais.Pendente;
+    el.statAndamento.textContent = totais.andamento;
+    el.statEntregue.textContent = totais.entregue;
+
+    filtrados.forEach(function (p) {
+      var tr = document.createElement('tr');
+
+      tr.appendChild(criarTd(p['Data'] || '—', 'mono'));
+      tr.appendChild(criarTd(p['Cód. Cliente'] || '—'));
+      tr.appendChild(criarTd(p['Tipo de Produto'] || '—'));
+      tr.appendChild(criarTd(p['Modelo/SKU'] || '—', 'mono'));
+      tr.appendChild(criarTd(p['Peças'] || '—', null, 'pecas-cell'));
+      tr.appendChild(criarTd(p['Garantia'] || '—'));
+      tr.appendChild(criarTd(p['Pedido'] || '—', null, 'pedido-num'));
+
+      tr.appendChild(criarTdSelect(p, 'Status', STATUS_OPCOES, STATUS_CLASS, statusSlug));
+      tr.appendChild(criarTdSelect(p, 'Pagamento', PAG_OPCOES, PAG_CLASS, function (v) {
+        return v === '---' ? '---' : v.replace(/\s+/g, '');
+      }));
+
+      var tdAcoes = document.createElement('td');
+      var acoes = document.createElement('div');
+      acoes.className = 'row-actions';
+
+      var btnEdit = document.createElement('button');
+      btnEdit.title = 'Editar';
+      btnEdit.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"></path></svg>';
+      btnEdit.onclick = function () { abrirModalPedido(p); };
+
+      var btnDel = document.createElement('button');
+      btnDel.title = 'Excluir';
+      btnDel.className = 'del';
+      btnDel.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+      btnDel.onclick = function () { excluir(p); };
+
+      acoes.appendChild(btnEdit);
+      acoes.appendChild(btnDel);
+      tdAcoes.appendChild(acoes);
+      tr.appendChild(tdAcoes);
+
+      el.tbody.appendChild(tr);
+    });
+  }
+
+  function criarTd(texto, cls, extraCls) {
+    var td = document.createElement('td');
+    if (cls) td.classList.add(cls);
+    if (extraCls) td.classList.add(extraCls);
+    td.textContent = texto;
+    return td;
+  }
+
+  function criarTdSelect(pedido, campo, opcoes, classMap, slugFn) {
+    var td = document.createElement('td');
+    var select = document.createElement('select');
+    select.className = 'badge-select ' + (classMap[pedido[campo]] || '');
+    opcoes.forEach(function (op) {
+      var option = document.createElement('option');
+      option.value = op;
+      option.textContent = op;
+      if (op === pedido[campo]) option.selected = true;
+      select.appendChild(option);
+    });
+    select.onchange = function () {
+      var novoValor = select.value;
+      select.className = 'badge-select ' + (classMap[novoValor] || '');
+      var dados = {};
+      dados[campo] = novoValor;
+      apiPost({ action: 'update', id: pedido.ID, data: dados }).then(function (res) {
+        if (res.ok) { pedido[campo] = novoValor; toast(campo + ' atualizado', 'ok'); }
+        else toast('Não foi possível atualizar', 'err');
+      });
+    };
+    td.appendChild(select);
+    return td;
+  }
+
+  function excluir(pedido) {
+    if (!confirm('Excluir o pedido ' + (pedido['Pedido'] || pedido.ID) + '?')) return;
+    apiPost({ action: 'delete', id: pedido.ID }).then(function (res) {
+      if (res.ok) {
+        pedidos = pedidos.filter(function (p) { return p.ID !== pedido.ID; });
+        renderizar();
+        toast('Pedido excluído', 'ok');
+      } else toast('Não foi possível excluir', 'err');
+    });
+  }
+
+  // -------- Modal Pedido --------
+  function abrirModalPedido(pedido) {
+    editandoId = pedido ? pedido.ID : null;
+    el.modalTitulo.textContent = pedido ? 'Editar Pedido' : 'Novo Pedido';
+    el.fData.value = pedido ? converterParaInputDate(pedido['Data']) : new Date().toISOString().slice(0, 10);
+    el.fCliente.value = pedido ? pedido['Cód. Cliente'] || '' : '';
+    el.fTipo.value = pedido ? pedido['Tipo de Produto'] || 'Tablet' : 'Tablet';
+    el.fSku.value = pedido ? pedido['Modelo/SKU'] || '' : '';
+    el.fPecas.value = pedido ? pedido['Peças'] || '' : '';
+    el.fGarantia.value = pedido ? pedido['Garantia'] || '' : '';
+    el.fPedido.value = pedido ? pedido['Pedido'] || '' : '';
+    el.fStatus.value = pedido ? pedido['Status'] || 'Pendente' : 'Pendente';
+    el.fPagamento.value = pedido ? pedido['Pagamento'] || '---' : '---';
+    el.formErro.textContent = '';
+    el.modalPedido.classList.add('open');
+  }
+
+  function converterParaInputDate(valor) {
+    if (!valor) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(valor)) return valor;
+    var m = String(valor).match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if (m) return m[3] + '-' + m[2] + '-' + m[1];
+    return '';
+  }
+
+  function fecharModalPedido() { el.modalPedido.classList.remove('open'); }
+
+  function salvarPedidoModal() {
+    if (!el.fCliente.value.trim() || !el.fPedido.value.trim()) {
+      el.formErro.textContent = 'Preencha ao menos Cód. Cliente e Nº do Pedido.';
+      return;
+    }
+    var dados = {
+      'Data': el.fData.value,
+      'Cód. Cliente': el.fCliente.value.trim(),
+      'Tipo de Produto': el.fTipo.value,
+      'Modelo/SKU': el.fSku.value.trim(),
+      'Peças': el.fPecas.value.trim(),
+      'Garantia': el.fGarantia.value.trim(),
+      'Pedido': el.fPedido.value.trim(),
+      'Status': el.fStatus.value,
+      'Pagamento': el.fPagamento.value
+    };
+
+    el.salvarPedido.disabled = true;
+    var acaoPromise = editandoId
+      ? apiPost({ action: 'update', id: editandoId, data: dados })
+      : apiPost({ action: 'create', data: dados });
+
+    acaoPromise.then(function (res) {
+      el.salvarPedido.disabled = false;
+      if (res.ok) {
+        fecharModalPedido();
+        toast(editandoId ? 'Pedido atualizado' : 'Pedido criado', 'ok');
+        carregar();
+      } else {
+        el.formErro.textContent = res.error || 'Não foi possível salvar o pedido.';
+      }
+    });
+  }
+
+  // -------- Modal Config --------
+  function abrirModalConfig() {
+    el.fApiUrl.value = apiUrl;
+    el.modalConfig.classList.add('open');
+  }
+  function fecharModalConfig() { el.modalConfig.classList.remove('open'); }
+
+  function salvarConfigModal() {
+    var valor = el.fApiUrl.value.trim();
+    if (!valor) return;
+    apiUrl = valor;
+    if (window.localStorage) localStorage.setItem('pedidos_api_url', apiUrl);
+    fecharModalConfig();
+    carregar();
+  }
+
+  // -------- Eventos --------
+  el.btnRefresh.onclick = carregar;
+  el.btnConfig.onclick = abrirModalConfig;
+  el.btnNovo.onclick = function () { abrirModalPedido(null); };
+  el.fecharModalPedido.onclick = fecharModalPedido;
+  el.cancelarPedido.onclick = fecharModalPedido;
+  el.salvarPedido.onclick = salvarPedidoModal;
+  el.fecharModalConfig.onclick = fecharModalConfig;
+  el.cancelarConfig.onclick = fecharModalConfig;
+  el.salvarConfig.onclick = salvarConfigModal;
+
+  [el.filtroBusca, el.filtroTipo, el.filtroStatus, el.filtroPagamento].forEach(function (campo) {
+    campo.addEventListener('input', renderizar);
+    campo.addEventListener('change', renderizar);
+  });
+
+  [el.modalPedido, el.modalConfig].forEach(function (overlay) {
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  carregar();
+})();
+</script>
+</body>
+</html>
