@@ -148,7 +148,7 @@
   box-shadow: var(--shadow); overflow: hidden;
 }
 #pedidosApp .table-scroll { overflow-x: auto; }
-#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 92em; }
+#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 98em; }
 #pedidosApp th.check-col, #pedidosApp td.check-col { width: 2.6em; text-align:center; padding-left: 0.6em; padding-right: 0.6em; }
 #pedidosApp input[type="checkbox"].row-check, #pedidosApp input[type="checkbox"]#checkTodos {
   width: 1.05em; height: 1.05em; cursor:pointer; accent-color: var(--accent); vertical-align:middle;
@@ -582,6 +582,7 @@
               <th>Status</th>
               <th>Pagamento</th>
               <th>Comprovante</th>
+              <th>Criado Por</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -1607,6 +1608,7 @@
       }));
 
       tr.appendChild(criarTdComprovante(p['Comprovante']));
+      tr.appendChild(criarTd(p['Criado Por'] || '—', 'mono'));
 
       var tdAcoes = document.createElement('td');
       var acoes = document.createElement('div');
