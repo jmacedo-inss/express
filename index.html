@@ -427,23 +427,24 @@
 </head>
 <body>
 
-<div id="loginOverlay">
-  <div class="login-card">
-    <div class="logo-chip">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 12h18"></path></svg>
-    </div>
-    <h2>Controle de Pedidos de Peças</h2>
-    <p class="sub">Entre com seu usuário para continuar</p>
-    <div class="field"><label for="loginUsuario">Usuário</label><input type="text" id="loginUsuario" autocomplete="username"></div>
-    <div class="field"><label for="loginSenha">Senha</label><input type="password" id="loginSenha" autocomplete="current-password"></div>
-    <div class="form-error" id="loginErro"></div>
-    <button class="btn-confirm" id="btnEntrar" style="width:100%;">Entrar</button>
-  </div>
-</div>
-
-<div id="pedidosApp" hidden>
+<div id="pedidosApp">
   <div class="bg-glow"><span class="g1"></span><span class="g2"></span></div>
 
+  <div id="loginOverlay">
+    <div class="login-card">
+      <div class="logo-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 12h18"></path></svg>
+      </div>
+      <h2>Controle de Pedidos de Peças</h2>
+      <p class="sub">Entre com seu usuário para continuar</p>
+      <div class="field"><label for="loginUsuario">Usuário</label><input type="text" id="loginUsuario" autocomplete="username"></div>
+      <div class="field"><label for="loginSenha">Senha</label><input type="password" id="loginSenha" autocomplete="current-password"></div>
+      <div class="form-error" id="loginErro"></div>
+      <button class="btn-confirm" id="btnEntrar" style="width:100%;">Entrar</button>
+    </div>
+  </div>
+
+  <div id="appContent" hidden>
   <header class="topbar">
     <div class="brand">
       <div class="logo-chip">
@@ -714,6 +715,7 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  </div>
 </div>
 
 <script>
@@ -763,7 +765,7 @@
   // Cole aqui a URL do Web App do Apps Script antes de publicar — assim TODOS os
   // usuários já acessam a planilha certa automaticamente, sem precisar configurar nada.
   // O botão de engrenagem (só visível pro admin) permite substituir isso depois, se precisar.
-  var API_URL_PADRAO = 'https://script.google.com/macros/s/AKfycbxF4SDqjQP331kfFi_LwhkWj3tW6xbJKu3vAg8J3TcuhWtcC8oZiow2zBfk3nuE6XvyDg/exec';
+  var API_URL_PADRAO = '';
 
   var apiUrl = (window.localStorage && localStorage.getItem('pedidos_api_url')) || API_URL_PADRAO;
   var pedidos = [];
@@ -819,7 +821,7 @@
   }
 
   function mostrarLogin() {
-    document.getElementById('pedidosApp').hidden = true;
+    document.getElementById('appContent').hidden = true;
     el.loginOverlay.hidden = false;
     el.loginSenha.value = '';
     el.loginErro.textContent = '';
@@ -828,7 +830,7 @@
 
   function mostrarApp() {
     el.loginOverlay.hidden = true;
-    document.getElementById('pedidosApp').hidden = false;
+    document.getElementById('appContent').hidden = false;
     el.userChipNome.textContent = sessao.nome;
     el.userAvatar.textContent = iniciais(sessao.nome);
     el.userDropdownNome.textContent = sessao.nome;
