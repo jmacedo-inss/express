@@ -254,6 +254,7 @@
 
 /* ---------- Nome (sempre maiúsculo) ---------- */
 #pedidosApp #fNome { text-transform: uppercase; }
+#pedidosApp #fSku { text-transform: uppercase; }
 #pedidosApp td.nome-cell { text-transform: uppercase; }
 
 /* ---------- WhatsApp ---------- */
@@ -689,7 +690,7 @@
           </select>
         </div>
       </div>
-      <div class="field"><label for="fValorPago">Valor Pago</label><input type="text" id="fValorPago" inputmode="numeric" placeholder="R$ 0,00"></div>
+      <div class="field fade-toggle fechado" id="fValorPagoWrap"><label for="fValorPago">Valor Pago</label><input type="text" id="fValorPago" inputmode="numeric" placeholder="R$ 0,00"></div>
 
       <div class="field">
         <label for="fComprovante">Comprovante</label>
@@ -886,7 +887,7 @@
    'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir',
    'modalPedido','fecharModalPedido','modalTitulo','fData','fNome','fWhatsapp','fTipo','tipoIcone','fSku',
    'pecasTagWrap','pecasChips','fPecasInput',
-   'fGarantia','fPedido','fPedidoWrap','fStatus','fPagamento','fValorPago',
+   'fGarantia','fPedido','fPedidoWrap','fStatus','fPagamento','fValorPago','fValorPagoWrap',
    'fComprovante','comprovanteNomeArquivo','comprovanteAtualWrap','comprovanteAtualLink',
    'historicoBox','historicoLista',
    'formErro','cancelarPedido','salvarPedido',
@@ -1625,7 +1626,7 @@
       tr.appendChild(criarTd(p['Nome'] ? String(p['Nome']).toUpperCase() : '—', null, 'nome-cell'));
       tr.appendChild(criarTdWhatsapp(p['WhatsApp']));
       tr.appendChild(criarTdTipo(p['Tipo de Produto']));
-      tr.appendChild(criarTd(p['Modelo/SKU'] || '—', 'mono'));
+      tr.appendChild(criarTd(p['Modelo/SKU'] ? String(p['Modelo/SKU']).toUpperCase() : '—', 'mono'));
       tr.appendChild(criarTdPecas(p['Peças']));
       tr.appendChild(criarTdGarantia(p['Garantia']));
       tr.appendChild(criarTdPedido(p));
@@ -1963,6 +1964,12 @@
     try { el.fNome.setSelectionRange(pos, pos); } catch (e) {}
   });
 
+  el.fSku.addEventListener('input', function () {
+    var pos = el.fSku.selectionStart;
+    el.fSku.value = el.fSku.value.toUpperCase();
+    try { el.fSku.setSelectionRange(pos, pos); } catch (e) {}
+  });
+
   function formatarWhatsapp(valor) {
     var digitos = String(valor || '').replace(/\D/g, '').slice(0, 11);
     var ddd = digitos.slice(0, 2);
@@ -1988,6 +1995,13 @@
   el.fValorPago.addEventListener('input', function () {
     el.fValorPago.value = formatarValorPago(el.fValorPago.value);
   });
+
+  function atualizarVisibilidadeValorPago(limparSeEscondido) {
+    var pago = el.fPagamento.value === 'Pago' || el.fPagamento.value === 'Pago parcialmente';
+    el.fValorPagoWrap.classList.toggle('fechado', !pago);
+    if (!pago && limparSeEscondido) el.fValorPago.value = '';
+  }
+  el.fPagamento.addEventListener('change', function () { atualizarVisibilidadeValorPago(true); });
 
   function digitosWhatsapp(valor) { return String(valor || '').replace(/\D/g, '').slice(0, 11); }
 
@@ -2041,7 +2055,7 @@
     el.fWhatsapp.value = pedido ? formatarWhatsapp(pedido['WhatsApp']) : '';
     el.fTipo.value = pedido ? pedido['Tipo de Produto'] || 'Celular' : 'Celular';
     atualizarIconeTipo();
-    el.fSku.value = pedido ? pedido['Modelo/SKU'] || '' : '';
+    el.fSku.value = pedido ? String(pedido['Modelo/SKU'] || '').toUpperCase() : '';
     pecasTags = pedido && pedido['Peças'] ? String(pedido['Peças']).split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [];
     el.fPecasInput.value = '';
     renderPecasTags();
@@ -2052,6 +2066,7 @@
     el.fStatus.value = pedido ? pedido['Status'] || 'Pendente' : 'Pendente';
     el.fPagamento.value = pedido ? pedido['Pagamento'] || '---' : '---';
     el.fValorPago.value = pedido && pedido['Valor Pago'] ? formatarValorPago(pedido['Valor Pago']) : '';
+    atualizarVisibilidadeValorPago(false);
     el.fComprovante.value = '';
     el.comprovanteNomeArquivo.textContent = 'Clique para anexar (imagem ou PDF)';
     if (pedido && pedido['Comprovante']) {
@@ -2113,7 +2128,7 @@
       'Nome': el.fNome.value.trim().toUpperCase(),
       'WhatsApp': el.fWhatsapp.value.trim(),
       'Tipo de Produto': el.fTipo.value,
-      'Modelo/SKU': el.fSku.value.trim(),
+      'Modelo/SKU': el.fSku.value.trim().toUpperCase(),
       'Peças': (function () {
         if (el.fPecasInput.value.trim()) { adicionarPecasTexto(el.fPecasInput.value); el.fPecasInput.value = ''; }
         return pecasTags.join(', ');
