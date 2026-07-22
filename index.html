@@ -797,6 +797,20 @@
     sessao.nivel = localStorage.getItem('pedidos_nivel') || '';
   }
 
+  /**
+   * Fecha o modal ao clicar no fundo (fora da caixa), mas só se o clique
+   * COMEÇOU e TERMINOU no fundo — evita fechar quando o usuário seleciona
+   * um texto dentro do modal e solta o mouse fora dele sem querer.
+   */
+  function configurarFechamentoPorFora(overlay) {
+    var comecouNoFundo = false;
+    overlay.addEventListener('mousedown', function (e) { comecouNoFundo = (e.target === overlay); });
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay && comecouNoFundo) overlay.classList.remove('open');
+      comecouNoFundo = false;
+    });
+  }
+
   function toast(msg, tipo) {
     el.toast.textContent = msg;
     el.toast.className = 'toast show' + (tipo ? ' ' + tipo : '');
@@ -1057,9 +1071,7 @@
   el.fecharModalUsuarioForm.onclick = fecharModalUsuarioForm;
   el.cancelarUsuarioForm.onclick = fecharModalUsuarioForm;
   el.salvarUsuarioForm.onclick = salvarUsuarioForm;
-  [el.modalSenha, el.modalUsuarios, el.modalUsuarioForm].forEach(function (overlay) {
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.classList.remove('open'); });
-  });
+  [el.modalSenha, el.modalUsuarios, el.modalUsuarioForm].forEach(configurarFechamentoPorFora);
 
   // -------- Histórico do pedido --------
   function criarItemHistorico(item, comReferencia) {
@@ -1138,7 +1150,7 @@
   el.btnAbrirHistoricoGeral.onclick = abrirModalHistoricoGeral;
   el.fecharModalHistoricoGeral.onclick = fecharModalHistoricoGeral;
   el.historicoGeralBusca.addEventListener('input', renderizarHistoricoGeral);
-  el.modalHistoricoGeral.addEventListener('click', function (e) { if (e.target === el.modalHistoricoGeral) fecharModalHistoricoGeral(); });
+  configurarFechamentoPorFora(el.modalHistoricoGeral);
 
   // -------- API --------
   function apiGet(paramsExtra) {
@@ -1698,11 +1710,7 @@
     campo.addEventListener('change', renderizar);
   });
 
-  [el.modalPedido, el.modalConfig].forEach(function (overlay) {
-    overlay.addEventListener('click', function (e) {
-      if (e.target === overlay) overlay.classList.remove('open');
-    });
-  });
+  [el.modalPedido, el.modalConfig].forEach(configurarFechamentoPorFora);
 
   if (sessao.token) {
     mostrarApp();
