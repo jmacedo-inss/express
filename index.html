@@ -308,7 +308,7 @@
 #pedidosApp .field { margin: 0 0 0.8em; }
 #pedidosApp .field label { display:block; font-size: 0.7em; font-weight:700; color: var(--text-dim); text-transform:uppercase; letter-spacing:0.03em; margin-bottom: 0.35em; }
 #pedidosApp .field-grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 0 0.7em; }
-#pedidosApp input[type="text"], #pedidosApp input[type="date"], #pedidosApp input[type="datetime-local"], #pedidosApp select, #pedidosApp textarea {
+#pedidosApp input[type="text"], #pedidosApp input[type="date"], #pedidosApp input[type="datetime-local"], #pedidosApp input[type="password"], #pedidosApp select, #pedidosApp textarea {
   width: 100%; background: var(--panel-2); border:1px solid var(--border); border-radius: 0.55em;
   padding: 0.5em 0.65em; color: var(--text); font-family: var(--font-body); font-size: 0.88em; outline:none;
   transition: border-color .15s ease, box-shadow .15s ease;
@@ -765,7 +765,7 @@
   // Cole aqui a URL do Web App do Apps Script antes de publicar — assim TODOS os
   // usuários já acessam a planilha certa automaticamente, sem precisar configurar nada.
   // O botão de engrenagem (só visível pro admin) permite substituir isso depois, se precisar.
-  var API_URL_PADRAO = '';
+  var API_URL_PADRAO = 'https://script.google.com/macros/s/AKfycbxF4SDqjQP331kfFi_LwhkWj3tW6xbJKu3vAg8J3TcuhWtcC8oZiow2zBfk3nuE6XvyDg/exec';
 
   var apiUrl = (window.localStorage && localStorage.getItem('pedidos_api_url')) || API_URL_PADRAO;
   var pedidos = [];
