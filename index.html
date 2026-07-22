@@ -335,11 +335,113 @@
 #pedidosApp .toast.ok { border-color: var(--good); color: var(--good); }
 
 #pedidosApp .config-note { font-size: 0.76em; color: var(--text-faint); margin: 0.4em 0 0.9em; line-height:1.5; }
+
+/* ---------- Tela de login ---------- */
+#loginOverlay {
+  position: fixed; inset: 0; z-index: 100; display:flex; align-items:center; justify-content:center;
+  background: var(--bg); background-image: radial-gradient(circle at 1px 1px, var(--border-soft) 1px, transparent 1px);
+  background-size: 24px 24px; padding: 1.2em;
+}
+#loginOverlay[hidden] { display: none; }
+#loginOverlay .login-card {
+  width: 100%; max-width: 24em; background: var(--panel); border:1px solid var(--border); border-radius: 1em;
+  padding: 2em 1.8em; box-shadow: var(--shadow); text-align:center;
+}
+#loginOverlay .logo-chip { margin: 0 auto 1em; }
+#loginOverlay h2 { font-family: var(--font-display); font-size: 1.2em; margin: 0 0 0.2em; }
+#loginOverlay p.sub { font-size: 0.82em; color: var(--text-dim); margin: 0 0 1.4em; }
+#loginOverlay .field { text-align:left; margin-bottom: 0.8em; }
+#loginOverlay .form-error { min-height: 1.1em; margin-top: 0.3em; }
+
+/* ---------- Menu de usuário (topbar) ---------- */
+#pedidosApp .user-menu-wrap { position: relative; }
+#pedidosApp .user-chip {
+  display:flex; align-items:center; gap:0.5em; height: 2.3em; padding: 0 0.8em 0 0.5em; border-radius: 0.65em;
+  background: var(--panel); border:1px solid var(--border); cursor:pointer; font-size: 0.84em; font-weight:600;
+  color: var(--text); transition: border-color .15s ease;
+}
+#pedidosApp .user-chip:hover { border-color: var(--accent); }
+#pedidosApp .user-chip .avatar {
+  width: 1.6em; height: 1.6em; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color:#fff; display:flex; align-items:center; justify-content:center; font-size: 0.78em; font-weight:800; flex-shrink:0;
+}
+#pedidosApp .user-chip svg { width: 0.9em; height: 0.9em; color: var(--text-faint); }
+#pedidosApp .user-dropdown {
+  position:absolute; top: calc(100% + 0.5em); right: 0; min-width: 13em; background: var(--panel); border:1px solid var(--border);
+  border-radius: 0.75em; box-shadow: var(--shadow); padding: 0.4em; z-index: 40; opacity:0; visibility:hidden; transform: translateY(-6px);
+  transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+}
+#pedidosApp .user-dropdown.open { opacity:1; visibility:visible; transform: translateY(0); }
+#pedidosApp .user-dropdown .info { padding: 0.5em 0.6em 0.6em; border-bottom: 1px solid var(--border-soft); margin-bottom: 0.3em; }
+#pedidosApp .user-dropdown .info .n { font-weight:700; font-size: 0.86em; }
+#pedidosApp .user-dropdown .info .u { font-size: 0.74em; color: var(--text-faint); }
+#pedidosApp .user-dropdown button {
+  width:100%; text-align:left; background:none; border:none; padding: 0.55em 0.6em; border-radius: 0.5em;
+  font-size: 0.84em; color: var(--text); cursor:pointer; display:flex; align-items:center; gap:0.55em;
+}
+#pedidosApp .user-dropdown button:hover { background: var(--panel-2); }
+#pedidosApp .user-dropdown button svg { width: 1em; height: 1em; color: var(--text-dim); flex-shrink:0; }
+#pedidosApp .user-dropdown button.sair { color: var(--danger); }
+#pedidosApp .user-dropdown button.sair svg { color: var(--danger); }
+
+/* ---------- Gestão de usuários ---------- */
+#pedidosApp table.usuarios { width:100%; border-collapse: collapse; font-size: 0.86em; }
+#pedidosApp table.usuarios th {
+  text-align:left; font-size: 0.72em; color: var(--text-faint); text-transform:uppercase; letter-spacing:0.03em;
+  padding: 0.5em 0.5em; border-bottom: 1px solid var(--border);
+}
+#pedidosApp table.usuarios td { padding: 0.5em; border-bottom: 1px solid var(--border-soft); vertical-align:middle; }
+#pedidosApp .nivel-chip { font-size: 0.74em; font-weight:700; padding: 0.15em 0.5em; border-radius: 0.4em; }
+#pedidosApp .nivel-admin { background: var(--accent-dim); color: var(--accent); }
+#pedidosApp .nivel-comum { background: var(--neutral-dim); color: var(--neutral); }
+#pedidosApp .status-ativo { color: var(--good); font-weight:700; font-size: 0.8em; }
+#pedidosApp .status-inativo { color: var(--text-faint); font-size: 0.8em; }
+#pedidosApp .usuarios-acoes { display:flex; gap:0.35em; }
+#pedidosApp .usuarios-acoes button {
+  width: 1.9em; height: 1.9em; border-radius: 0.45em; background: var(--panel-2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color: var(--text-dim);
+}
+#pedidosApp .usuarios-acoes button svg { width: 1em; height: 1em; }
+#pedidosApp .usuarios-acoes button:hover { border-color: var(--accent); color: var(--accent); }
+#pedidosApp .usuarios-acoes button.excluir:hover { border-color: var(--danger); color: var(--danger); }
+#pedidosApp .btn-add-usuario {
+  display:flex; align-items:center; gap:0.4em; margin: 0 0 1em auto; padding: 0.5em 0.9em; border-radius:0.6em;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; border:none; font-weight:700;
+  font-size: 0.84em; cursor:pointer; font-family: var(--font-display);
+}
+#pedidosApp .btn-add-usuario svg { width: 1em; height: 1em; }
+
+/* ---------- Histórico do pedido ---------- */
+#pedidosApp .historico-box { margin-top: 1.2em; border-top: 1px solid var(--border-soft); padding-top: 1em; }
+#pedidosApp .historico-box h4 {
+  font-family: var(--font-display); font-size: 0.82em; text-transform:uppercase; letter-spacing:0.03em;
+  color: var(--text-faint); margin: 0 0 0.6em;
+}
+#pedidosApp .historico-lista { max-height: 12em; overflow-y:auto; display:flex; flex-direction:column; gap: 0.55em; }
+#pedidosApp .historico-item { font-size: 0.8em; padding: 0.5em 0.65em; background: var(--panel-2); border-radius: 0.5em; }
+#pedidosApp .historico-item .cabecalho { display:flex; justify-content:space-between; gap:0.5em; font-weight:700; color: var(--text); margin-bottom: 0.15em; }
+#pedidosApp .historico-item .cabecalho .quando { font-weight:500; color: var(--text-faint); font-size: 0.92em; white-space:nowrap; }
+#pedidosApp .historico-item .desc { color: var(--text-dim); }
+#pedidosApp .historico-vazio { font-size: 0.8em; color: var(--text-faint); font-style:italic; }
 </style>
 </head>
 <body>
 
-<div id="pedidosApp">
+<div id="loginOverlay">
+  <div class="login-card">
+    <div class="logo-chip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 12h18"></path></svg>
+    </div>
+    <h2>Controle de Pedidos de Peças</h2>
+    <p class="sub">Entre com seu usuário para continuar</p>
+    <div class="field"><label for="loginUsuario">Usuário</label><input type="text" id="loginUsuario" autocomplete="username"></div>
+    <div class="field"><label for="loginSenha">Senha</label><input type="password" id="loginSenha" autocomplete="current-password"></div>
+    <div class="form-error" id="loginErro"></div>
+    <button class="btn-confirm" id="btnEntrar" style="width:100%;">Entrar</button>
+  </div>
+</div>
+
+<div id="pedidosApp" hidden>
   <div class="bg-glow"><span class="g1"></span><span class="g2"></span></div>
 
   <header class="topbar">
@@ -354,7 +456,16 @@
     </div>
     <div class="topbar-actions">
       <button class="icon-btn" id="btnRefresh" title="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
-      <button class="icon-btn" id="btnConfig" title="Configurar URL da API"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+      <button class="icon-btn" id="btnConfig" title="Configurar URL da API" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+      <div class="user-menu-wrap">
+        <button class="user-chip" id="userChip"><span class="avatar" id="userAvatar">?</span><span id="userChipNome">—</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="info"><div class="n" id="userDropdownNome">—</div><div class="u" id="userDropdownNivel">—</div></div>
+          <button type="button" id="btnAbrirTrocarSenha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Trocar senha</button>
+          <button type="button" id="btnAbrirUsuarios" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Gerenciar usuários</button>
+          <button type="button" class="sair" id="btnSair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Sair</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -514,6 +625,11 @@
         </div>
       </div>
 
+      <div class="historico-box" id="historicoBox" hidden>
+        <h4>Histórico</h4>
+        <div class="historico-lista" id="historicoLista"></div>
+      </div>
+
       <div class="form-error" id="formErro"></div>
       <div class="modal-actions">
         <button class="btn-ghost" id="cancelarPedido">Cancelar</button>
@@ -532,6 +648,67 @@
       <div class="modal-actions">
         <button class="btn-ghost" id="cancelarConfig">Cancelar</button>
         <button class="btn-confirm" id="salvarConfig">Salvar e Conectar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: trocar senha -->
+  <div class="modal-overlay" id="modalSenha">
+    <div class="modal">
+      <button class="modal-close" id="fecharModalSenha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Trocar senha</h3>
+      <div class="field"><label for="senhaAtualInput">Senha atual</label><input type="password" id="senhaAtualInput" autocomplete="current-password"></div>
+      <div class="field"><label for="senhaNovaInput">Nova senha</label><input type="password" id="senhaNovaInput" autocomplete="new-password"></div>
+      <div class="field"><label for="senhaNovaConfirmInput">Confirmar nova senha</label><input type="password" id="senhaNovaConfirmInput" autocomplete="new-password"></div>
+      <div class="form-error" id="senhaErro"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelarSenha">Cancelar</button>
+        <button class="btn-confirm" id="salvarSenha">Salvar Senha</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: gerenciar usuários (admin) -->
+  <div class="modal-overlay" id="modalUsuarios">
+    <div class="modal" style="max-width: 42em;">
+      <button class="modal-close" id="fecharModalUsuarios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>Gerenciar usuários</h3>
+      <button class="btn-add-usuario" id="btnNovoUsuario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Novo Usuário</button>
+      <div style="overflow-x:auto;">
+        <table class="usuarios">
+          <thead><tr><th>Nome</th><th>Usuário</th><th>Nível</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="usuariosTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: novo/editar usuário -->
+  <div class="modal-overlay" id="modalUsuarioForm">
+    <div class="modal">
+      <button class="modal-close" id="fecharModalUsuarioForm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <h3><span id="usuarioFormTitulo">Novo Usuário</span></h3>
+      <div class="field"><label for="ufNome">Nome</label><input type="text" id="ufNome" placeholder="Ex: Maria Silva"></div>
+      <div class="field"><label for="ufUsuario">Usuário (login)</label><input type="text" id="ufUsuario" placeholder="Ex: maria.silva"></div>
+      <div class="field"><label for="ufSenha">Senha</label><input type="password" id="ufSenha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+      <div class="field">
+        <label for="ufNivel">Nível</label>
+        <select id="ufNivel">
+          <option value="comum">Comum</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="field" id="ufAtivoWrap" hidden>
+        <label for="ufAtivo">Status</label>
+        <select id="ufAtivo">
+          <option value="true">Ativo</option>
+          <option value="false">Inativo</option>
+        </select>
+      </div>
+      <div class="form-error" id="usuarioFormErro"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelarUsuarioForm">Cancelar</button>
+        <button class="btn-confirm" id="salvarUsuarioForm">Salvar</button>
       </div>
     </div>
   </div>
@@ -572,15 +749,35 @@
    'pecasTagWrap','pecasChips','fPecasInput',
    'fGarantia','fPedido','fStatus','fPagamento',
    'fComprovante','comprovanteNomeArquivo','comprovanteAtualWrap','comprovanteAtualLink',
+   'historicoBox','historicoLista',
    'formErro','cancelarPedido','salvarPedido',
-   'modalConfig','fecharModalConfig','fApiUrl','cancelarConfig','salvarConfig','toast'
+   'modalConfig','fecharModalConfig','fApiUrl','cancelarConfig','salvarConfig','toast',
+   'loginOverlay','loginUsuario','loginSenha','loginErro','btnEntrar',
+   'userChip','userAvatar','userChipNome','userDropdown','userDropdownNome','userDropdownNivel',
+   'btnAbrirTrocarSenha','btnAbrirUsuarios','btnSair',
+   'modalSenha','fecharModalSenha','senhaAtualInput','senhaNovaInput','senhaNovaConfirmInput','senhaErro','cancelarSenha','salvarSenha',
+   'modalUsuarios','fecharModalUsuarios','btnNovoUsuario','usuariosTbody',
+   'modalUsuarioForm','fecharModalUsuarioForm','usuarioFormTitulo','ufNome','ufUsuario','ufSenha','ufNivel','ufAtivoWrap','ufAtivo','usuarioFormErro','cancelarUsuarioForm','salvarUsuarioForm'
   ].forEach(function (id) { el[id] = document.getElementById(id); });
 
-  var apiUrl = window.localStorage ? (localStorage.getItem('pedidos_api_url') || '') : '';
+  // Cole aqui a URL do Web App do Apps Script antes de publicar — assim TODOS os
+  // usuários já acessam a planilha certa automaticamente, sem precisar configurar nada.
+  // O botão de engrenagem (só visível pro admin) permite substituir isso depois, se precisar.
+  var API_URL_PADRAO = '';
+
+  var apiUrl = (window.localStorage && localStorage.getItem('pedidos_api_url')) || API_URL_PADRAO;
   var pedidos = [];
   var editandoId = null;
   var selecionados = new Set();
   var ultimosFiltrados = [];
+
+  var sessao = { token: '', nome: '', usuario: '', nivel: '' };
+  if (window.localStorage) {
+    sessao.token = localStorage.getItem('pedidos_token') || '';
+    sessao.nome = localStorage.getItem('pedidos_nome') || '';
+    sessao.usuario = localStorage.getItem('pedidos_usuario') || '';
+    sessao.nivel = localStorage.getItem('pedidos_nivel') || '';
+  }
 
   function toast(msg, tipo) {
     el.toast.textContent = msg;
@@ -591,22 +788,320 @@
 
   function statusSlug(s) { return s.replace(/[^a-zA-Z]/g, ''); }
 
+  // -------- Autenticação --------
+  function salvarSessaoLocal(dadosLogin) {
+    sessao.token = dadosLogin.token;
+    sessao.nome = dadosLogin.nome;
+    sessao.usuario = dadosLogin.usuario;
+    sessao.nivel = dadosLogin.nivel;
+    if (window.localStorage) {
+      localStorage.setItem('pedidos_token', sessao.token);
+      localStorage.setItem('pedidos_nome', sessao.nome);
+      localStorage.setItem('pedidos_usuario', sessao.usuario);
+      localStorage.setItem('pedidos_nivel', sessao.nivel);
+    }
+  }
+
+  function encerrarSessaoLocal() {
+    sessao.token = ''; sessao.nome = ''; sessao.usuario = ''; sessao.nivel = '';
+    if (window.localStorage) {
+      localStorage.removeItem('pedidos_token');
+      localStorage.removeItem('pedidos_nome');
+      localStorage.removeItem('pedidos_usuario');
+      localStorage.removeItem('pedidos_nivel');
+    }
+  }
+
+  function iniciais(nome) {
+    var partes = String(nome || '').trim().split(/\s+/);
+    var i = (partes[0] ? partes[0][0] : '') + (partes.length > 1 ? partes[partes.length - 1][0] : '');
+    return i.toUpperCase() || '?';
+  }
+
+  function mostrarLogin() {
+    document.getElementById('pedidosApp').hidden = true;
+    el.loginOverlay.hidden = false;
+    el.loginSenha.value = '';
+    el.loginErro.textContent = '';
+    el.loginUsuario.focus();
+  }
+
+  function mostrarApp() {
+    el.loginOverlay.hidden = true;
+    document.getElementById('pedidosApp').hidden = false;
+    el.userChipNome.textContent = sessao.nome;
+    el.userAvatar.textContent = iniciais(sessao.nome);
+    el.userDropdownNome.textContent = sessao.nome;
+    el.userDropdownNivel.textContent = sessao.nivel === 'admin' ? 'Administrador' : 'Usuário comum';
+    var ehAdmin = sessao.nivel === 'admin';
+    el.btnConfig.hidden = !ehAdmin;
+    el.btnAbrirUsuarios.hidden = !ehAdmin;
+    carregar();
+  }
+
+  function fazerLogin() {
+    var usuario = el.loginUsuario.value.trim();
+    var senha = el.loginSenha.value;
+    if (!usuario || !senha) { el.loginErro.textContent = 'Preencha usuário e senha.'; return; }
+    el.btnEntrar.disabled = true;
+    el.loginErro.textContent = '';
+    if (!apiUrl) {
+      el.loginErro.textContent = 'A URL do sistema ainda não foi configurada. Fale com o administrador.';
+      el.btnEntrar.disabled = false;
+      return;
+    }
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'login', usuario: usuario, senha: senha })
+    }).then(function (r) { return r.json(); })
+      .then(function (res) {
+        el.btnEntrar.disabled = false;
+        if (res.ok) {
+          salvarSessaoLocal(res);
+          mostrarApp();
+        } else {
+          el.loginErro.textContent = res.error || 'Não foi possível entrar.';
+        }
+      }).catch(function (err) {
+        el.btnEntrar.disabled = false;
+        el.loginErro.textContent = 'Erro de conexão: ' + err.message;
+      });
+  }
+
+  function fazerLogout() {
+    apiPost({ action: 'logout' }).then(function () {
+      encerrarSessaoLocal();
+      mostrarLogin();
+    });
+  }
+
+  el.btnEntrar.onclick = fazerLogin;
+  el.loginSenha.addEventListener('keydown', function (e) { if (e.key === 'Enter') fazerLogin(); });
+  el.loginUsuario.addEventListener('keydown', function (e) { if (e.key === 'Enter') el.loginSenha.focus(); });
+
+  el.userChip.onclick = function (e) { e.stopPropagation(); el.userDropdown.classList.toggle('open'); };
+  document.addEventListener('click', function () { el.userDropdown.classList.remove('open'); });
+  el.userDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+  el.btnSair.onclick = fazerLogout;
+
+  // -------- Trocar senha --------
+  function abrirModalSenha() {
+    el.senhaAtualInput.value = '';
+    el.senhaNovaInput.value = '';
+    el.senhaNovaConfirmInput.value = '';
+    el.senhaErro.textContent = '';
+    el.userDropdown.classList.remove('open');
+    el.modalSenha.classList.add('open');
+  }
+  function fecharModalSenha() { el.modalSenha.classList.remove('open'); }
+
+  function salvarNovaSenha() {
+    var atual = el.senhaAtualInput.value;
+    var nova = el.senhaNovaInput.value;
+    var confirmar = el.senhaNovaConfirmInput.value;
+    if (!atual || !nova || !confirmar) { el.senhaErro.textContent = 'Preencha todos os campos.'; return; }
+    if (nova.length < 6) { el.senhaErro.textContent = 'A nova senha deve ter ao menos 6 caracteres.'; return; }
+    if (nova !== confirmar) { el.senhaErro.textContent = 'A confirmação não bate com a nova senha.'; return; }
+    el.salvarSenha.disabled = true;
+    apiPost({ action: 'trocarSenha', senhaAtual: atual, senhaNova: nova }).then(function (res) {
+      el.salvarSenha.disabled = false;
+      if (res.ok) { fecharModalSenha(); toast('Senha alterada com sucesso', 'ok'); }
+      else el.senhaErro.textContent = res.error || 'Não foi possível trocar a senha.';
+    });
+  }
+
+  el.btnAbrirTrocarSenha.onclick = abrirModalSenha;
+  el.fecharModalSenha.onclick = fecharModalSenha;
+  el.cancelarSenha.onclick = fecharModalSenha;
+  el.salvarSenha.onclick = salvarNovaSenha;
+
+  // -------- Gerenciar usuários (admin) --------
+  var editandoUsuarioId = null;
+
+  function abrirModalUsuarios() {
+    el.userDropdown.classList.remove('open');
+    el.modalUsuarios.classList.add('open');
+    carregarUsuarios();
+  }
+  function fecharModalUsuarios() { el.modalUsuarios.classList.remove('open'); }
+
+  function carregarUsuarios() {
+    el.usuariosTbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-faint);">Carregando…</td></tr>';
+    apiPost({ action: 'listarUsuarios' }).then(function (res) {
+      if (!res.ok) { toast(res.error || 'Não foi possível carregar usuários', 'err'); return; }
+      renderizarUsuarios(res.usuarios || []);
+    });
+  }
+
+  function renderizarUsuarios(usuarios) {
+    el.usuariosTbody.innerHTML = '';
+    usuarios.forEach(function (u) {
+      var tr = document.createElement('tr');
+
+      var tdNome = document.createElement('td'); tdNome.textContent = u.Nome;
+      var tdUsuario = document.createElement('td'); tdUsuario.textContent = u.Usuario;
+
+      var tdNivel = document.createElement('td');
+      var chipNivel = document.createElement('span');
+      chipNivel.className = 'nivel-chip ' + (u.Nivel === 'admin' ? 'nivel-admin' : 'nivel-comum');
+      chipNivel.textContent = u.Nivel === 'admin' ? 'Admin' : 'Comum';
+      tdNivel.appendChild(chipNivel);
+
+      var tdStatus = document.createElement('td');
+      var spanStatus = document.createElement('span');
+      spanStatus.className = u.Ativo === false ? 'status-inativo' : 'status-ativo';
+      spanStatus.textContent = u.Ativo === false ? 'Inativo' : 'Ativo';
+      tdStatus.appendChild(spanStatus);
+
+      var tdAcoes = document.createElement('td');
+      var wrap = document.createElement('div');
+      wrap.className = 'usuarios-acoes';
+
+      var btnEdit = document.createElement('button');
+      btnEdit.title = 'Editar';
+      btnEdit.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"></path></svg>';
+      btnEdit.onclick = function () { abrirModalUsuarioForm(u); };
+
+      var btnExcluir = document.createElement('button');
+      btnExcluir.className = 'excluir';
+      btnExcluir.title = 'Excluir';
+      btnExcluir.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+      btnExcluir.onclick = function () {
+        if (!confirm('Excluir o usuário "' + u.Nome + '"?')) return;
+        apiPost({ action: 'excluirUsuario', id: u.ID }).then(function (res) {
+          if (res.ok) { toast('Usuário excluído', 'ok'); carregarUsuarios(); }
+          else toast(res.error || 'Não foi possível excluir', 'err');
+        });
+      };
+
+      wrap.appendChild(btnEdit);
+      wrap.appendChild(btnExcluir);
+      tdAcoes.appendChild(wrap);
+
+      tr.appendChild(tdNome);
+      tr.appendChild(tdUsuario);
+      tr.appendChild(tdNivel);
+      tr.appendChild(tdStatus);
+      tr.appendChild(tdAcoes);
+      el.usuariosTbody.appendChild(tr);
+    });
+  }
+
+  function abrirModalUsuarioForm(usuario) {
+    editandoUsuarioId = usuario ? usuario.ID : null;
+    el.usuarioFormTitulo.textContent = usuario ? 'Editar Usuário' : 'Novo Usuário';
+    el.ufNome.value = usuario ? usuario.Nome : '';
+    el.ufUsuario.value = usuario ? usuario.Usuario : '';
+    el.ufSenha.value = '';
+    el.ufSenha.placeholder = usuario ? 'Deixe em branco para manter a atual' : 'Mínimo 6 caracteres';
+    el.ufNivel.value = usuario ? usuario.Nivel : 'comum';
+    el.ufAtivoWrap.hidden = !usuario;
+    el.ufAtivo.value = usuario && usuario.Ativo === false ? 'false' : 'true';
+    el.usuarioFormErro.textContent = '';
+    el.modalUsuarioForm.classList.add('open');
+  }
+  function fecharModalUsuarioForm() { el.modalUsuarioForm.classList.remove('open'); }
+
+  function salvarUsuarioForm() {
+    var nome = el.ufNome.value.trim();
+    var usuarioLogin = el.ufUsuario.value.trim();
+    var senha = el.ufSenha.value;
+    if (!nome || !usuarioLogin) { el.usuarioFormErro.textContent = 'Preencha nome e usuário.'; return; }
+    if (!editandoUsuarioId && !senha) { el.usuarioFormErro.textContent = 'Defina uma senha.'; return; }
+    if (senha && senha.length < 6) { el.usuarioFormErro.textContent = 'A senha deve ter ao menos 6 caracteres.'; return; }
+
+    var dados = { Nome: nome, Usuario: usuarioLogin, Nivel: el.ufNivel.value };
+    if (senha) dados.Senha = senha;
+    if (editandoUsuarioId) dados.Ativo = el.ufAtivo.value === 'true';
+
+    el.salvarUsuarioForm.disabled = true;
+    var acao = editandoUsuarioId
+      ? apiPost({ action: 'atualizarUsuario', id: editandoUsuarioId, dados: dados })
+      : apiPost({ action: 'criarUsuario', dados: dados });
+
+    acao.then(function (res) {
+      el.salvarUsuarioForm.disabled = false;
+      if (res.ok) {
+        fecharModalUsuarioForm();
+        toast(editandoUsuarioId ? 'Usuário atualizado' : 'Usuário criado', 'ok');
+        carregarUsuarios();
+      } else {
+        el.usuarioFormErro.textContent = res.error || 'Não foi possível salvar.';
+      }
+    });
+  }
+
+  el.btnAbrirUsuarios.onclick = abrirModalUsuarios;
+  el.fecharModalUsuarios.onclick = fecharModalUsuarios;
+  el.btnNovoUsuario.onclick = function () { abrirModalUsuarioForm(null); };
+  el.fecharModalUsuarioForm.onclick = fecharModalUsuarioForm;
+  el.cancelarUsuarioForm.onclick = fecharModalUsuarioForm;
+  el.salvarUsuarioForm.onclick = salvarUsuarioForm;
+  [el.modalSenha, el.modalUsuarios, el.modalUsuarioForm].forEach(function (overlay) {
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.classList.remove('open'); });
+  });
+
+  // -------- Histórico do pedido --------
+  function carregarHistorico(pedidoId) {
+    el.historicoBox.hidden = true;
+    el.historicoLista.innerHTML = '';
+    if (!pedidoId) return;
+    apiGet('&action=historico&id=' + encodeURIComponent(pedidoId)).then(function (res) {
+      if (!res.ok) return;
+      el.historicoBox.hidden = false;
+      var itens = res.historico || [];
+      if (!itens.length) {
+        el.historicoLista.innerHTML = '<div class="historico-vazio">Nenhuma alteração registrada ainda.</div>';
+        return;
+      }
+      itens.forEach(function (item) {
+        var div = document.createElement('div');
+        div.className = 'historico-item';
+        var cabecalho = document.createElement('div');
+        cabecalho.className = 'cabecalho';
+        var quem = document.createElement('span'); quem.textContent = item.Usuario;
+        var quando = document.createElement('span'); quando.className = 'quando'; quando.textContent = item.DataHora;
+        cabecalho.appendChild(quem);
+        cabecalho.appendChild(quando);
+        var desc = document.createElement('div');
+        desc.className = 'desc';
+        desc.textContent = item.Descricao;
+        div.appendChild(cabecalho);
+        div.appendChild(desc);
+        el.historicoLista.appendChild(div);
+      });
+    });
+  }
+
   // -------- API --------
-  function apiGet() {
-    if (!apiUrl) { abrirModalConfig(); return Promise.resolve({ ok: false }); }
-    return fetch(apiUrl, { method: 'GET' })
+  function apiGet(paramsExtra) {
+    if (!apiUrl) { if (sessao.nivel === 'admin') abrirModalConfig(); return Promise.resolve({ ok: false }); }
+    var params = 'token=' + encodeURIComponent(sessao.token) + (paramsExtra || '');
+    return fetch(apiUrl + '?' + params, { method: 'GET' })
       .then(function (r) { return r.json(); })
+      .then(function (res) { tratarSessaoInvalida(res); return res; })
       .catch(function (err) { toast('Erro ao conectar: ' + err.message, 'err'); return { ok: false }; });
   }
 
   function apiPost(payload) {
-    if (!apiUrl) { abrirModalConfig(); return Promise.resolve({ ok: false }); }
+    if (!apiUrl) { if (sessao.nivel === 'admin') abrirModalConfig(); return Promise.resolve({ ok: false }); }
+    payload = Object.assign({ token: sessao.token }, payload);
     return fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     }).then(function (r) { return r.json(); })
+      .then(function (res) { tratarSessaoInvalida(res); return res; })
       .catch(function (err) { toast('Erro ao salvar: ' + err.message, 'err'); return { ok: false }; });
+  }
+
+  function tratarSessaoInvalida(res) {
+    if (res && res.semSessao) {
+      toast('Sua sessão expirou. Faça login novamente.', 'err');
+      encerrarSessaoLocal();
+      mostrarLogin();
+    }
   }
 
   function carregar() {
@@ -999,6 +1494,7 @@
       el.comprovanteAtualWrap.hidden = true;
     }
     el.formErro.textContent = '';
+    carregarHistorico(pedido ? pedido.ID : null);
     el.modalPedido.classList.add('open');
   }
 
@@ -1142,7 +1638,11 @@
     });
   });
 
-  carregar();
+  if (sessao.token) {
+    mostrarApp();
+  } else {
+    mostrarLogin();
+  }
 })();
 </script>
 </body>
