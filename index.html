@@ -133,7 +133,7 @@
   box-shadow: var(--shadow); overflow: hidden;
 }
 #pedidosApp .table-scroll { overflow-x: auto; }
-#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 76em; }
+#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 82em; }
 #pedidosApp table.pedidos thead th {
   position: sticky; top:0; background: var(--panel-2); z-index: 2;
   text-align:left; font-size: 0.74em; color: var(--text-faint); text-transform: uppercase; letter-spacing:0.03em;
@@ -145,6 +145,88 @@
 #pedidosApp table.pedidos tbody td.mono { font-family: var(--font-mono); color: var(--text-dim); white-space:nowrap; }
 #pedidosApp table.pedidos tbody td.pedido-num { font-family: var(--font-mono); font-weight:600; color: var(--text); white-space:nowrap; }
 #pedidosApp table.pedidos tbody td.pecas-cell { max-width: 18em; white-space: normal; color: var(--text-dim); }
+#pedidosApp .pecas-chips { display:flex; flex-wrap:wrap; gap: 0.3em; }
+#pedidosApp .pecas-chip-mini {
+  display:inline-flex; align-items:center; background: var(--panel-3); border:1px solid var(--border);
+  color: var(--text-dim); border-radius: 0.45em; padding: 0.15em 0.5em; font-size: 0.8em; font-weight:600; white-space:nowrap;
+}
+
+/* ---------- Tag input (Peças) ---------- */
+#pedidosApp .tag-input {
+  display:flex; flex-wrap:wrap; align-items:center; gap: 0.4em;
+  background: var(--panel-2); border:1px solid var(--border); border-radius: 0.55em;
+  padding: 0.4em 0.5em; min-height: 2.6em; transition: border-color .15s ease, box-shadow .15s ease;
+}
+#pedidosApp .tag-input.focused { border-color: var(--accent); box-shadow: 0 0 0 0.15em var(--accent-dim); }
+#pedidosApp .tag-chip {
+  display:inline-flex; align-items:center; gap: 0.35em; background: var(--accent-2-dim); border:1px solid var(--accent-2);
+  color: var(--accent-2); border-radius: 0.5em; padding: 0.2em 0.3em 0.2em 0.6em; font-size: 0.82em; font-weight:700; white-space:nowrap;
+}
+#pedidosApp .tag-chip button {
+  background:none; border:none; cursor:pointer; color: inherit; display:flex; align-items:center; justify-content:center;
+  padding: 0.15em; line-height:1; opacity: 0.7; border-radius: 0.3em;
+}
+#pedidosApp .tag-chip button:hover { opacity: 1; background: rgba(var(--accent-rgb), 0.15); }
+#pedidosApp .tag-chip button svg { width: 0.85em; height: 0.85em; }
+#pedidosApp .tag-input input {
+  flex: 1 1 8em; min-width: 8em; border:none; background:transparent; outline:none;
+  font-family: var(--font-body); font-size: 0.88em; color: var(--text); padding: 0.25em 0.1em;
+}
+#pedidosApp .tag-input-hint { font-size: 0.7em; color: var(--text-faint); margin-top: 0.3em; }
+
+/* ---------- Anexo / Comprovante ---------- */
+#pedidosApp .file-drop {
+  display:flex; align-items:center; gap:0.6em; background: var(--panel-2); border:1px dashed var(--border);
+  border-radius: 0.55em; padding: 0.55em 0.7em; cursor:pointer; transition: border-color .15s ease;
+}
+#pedidosApp .file-drop:hover { border-color: var(--accent); }
+#pedidosApp .file-drop svg { width: 1.2em; height: 1.2em; color: var(--text-dim); flex-shrink:0; }
+#pedidosApp .file-drop span { font-size: 0.84em; color: var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#pedidosApp .file-drop input[type="file"] { display:none; }
+#pedidosApp .comprovante-atual { display:flex; align-items:center; gap:0.5em; margin-top: 0.5em; font-size: 0.8em; }
+#pedidosApp .comprovante-atual a { color: var(--accent-2); font-weight:600; text-decoration:none; display:flex; align-items:center; gap:0.3em; }
+#pedidosApp .comprovante-atual a:hover { text-decoration:underline; }
+#pedidosApp .comprovante-atual a svg { width: 1em; height: 1em; }
+#pedidosApp .comprovante-link {
+  width: 2em; height: 2em; border-radius: 0.5em; background: var(--panel-2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; color: var(--text-dim); transition: border-color .15s ease, color .15s ease;
+}
+#pedidosApp .comprovante-link:hover { border-color: var(--accent); color: var(--accent); }
+#pedidosApp .comprovante-link svg { width: 1.05em; height: 1.05em; }
+
+/* ---------- Tipo de produto (ícone + seletor) ---------- */
+#pedidosApp .select-with-icon {
+  display:flex; align-items:center; gap: 0.55em; background: var(--panel-2); border:1px solid var(--border);
+  border-radius: 0.55em; padding: 0 0.6em; transition: border-color .15s ease, box-shadow .15s ease;
+}
+#pedidosApp .select-with-icon:focus-within { border-color: var(--accent); box-shadow: 0 0 0 0.15em var(--accent-dim); }
+#pedidosApp .select-icon { display:flex; align-items:center; justify-content:center; color: var(--accent); flex-shrink:0; }
+#pedidosApp .select-icon svg { width: 1.15em; height: 1.15em; }
+#pedidosApp .select-with-icon select {
+  border:none; background:transparent; padding: 0.5em 0; box-shadow:none;
+}
+#pedidosApp .select-with-icon select:focus { box-shadow:none; }
+#pedidosApp .tipo-cell { display:flex; align-items:center; gap: 0.5em; }
+#pedidosApp .tipo-cell .select-icon { color: var(--text-dim); }
+#pedidosApp .tipo-cell .select-icon svg { width: 1.1em; height: 1.1em; }
+
+/* ---------- Garantia (badge LP / OW) ---------- */
+#pedidosApp select.garantia-select {
+  width: 100%; border-radius: 0.55em; padding: 0.5em 0.65em; font-weight: 700; cursor:pointer;
+}
+#pedidosApp .garantia-LP { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+#pedidosApp .garantia-OW { background: var(--warn-dim); border-color: var(--warn); color: var(--warn); }
+#pedidosApp .garantia-chip-mini { display:inline-flex; align-items:center; border-radius: 0.45em; padding: 0.15em 0.55em; font-size: 0.8em; font-weight:700; }
+
+/* ---------- Pedido (edição inline na tabela) ---------- */
+#pedidosApp .pedido-input-cell {
+  width: 100%; border:1px solid transparent; background: transparent; border-radius: 0.4em;
+  padding: 0.35em 0.45em; font-family: var(--font-mono); font-weight:700; color: var(--text);
+  transition: border-color .15s ease, background-color .15s ease;
+}
+#pedidosApp .pedido-input-cell::placeholder { color: var(--text-faint); font-weight:500; }
+#pedidosApp .pedido-input-cell:hover { background: var(--panel-2); }
+#pedidosApp .pedido-input-cell:focus { background: var(--panel-2); border-color: var(--accent); outline:none; box-shadow: 0 0 0 0.15em var(--accent-dim); }
 
 #pedidosApp .badge-select {
   border:1px solid transparent; border-radius: 0.5em; padding: 0.35em 0.55em;
@@ -251,10 +333,10 @@
       <input type="search" id="filtroBusca" placeholder="Buscar por cliente, pedido, modelo/SKU…">
       <select id="filtroTipo">
         <option value="">Todos os tipos</option>
-        <option value="Tablet">Tablet</option>
         <option value="Celular">Celular</option>
-        <option value="Fones">Fones</option>
+        <option value="Tablet">Tablet</option>
         <option value="Relógio">Relógio</option>
+        <option value="Fones">Fones</option>
       </select>
       <select id="filtroStatus">
         <option value="">Todos os status</option>
@@ -287,6 +369,7 @@
               <th>Pedido</th>
               <th>Status</th>
               <th>Pagamento</th>
+              <th>Comprovante</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -314,19 +397,32 @@
       <div class="field-grid-2">
         <div class="field">
           <label for="fTipo">Tipo de produto</label>
-          <select id="fTipo">
-            <option value="Tablet">Tablet</option>
-            <option value="Celular">Celular</option>
-            <option value="Fones">Fones</option>
-            <option value="Relógio">Relógio</option>
-          </select>
+          <div class="select-with-icon">
+            <span class="select-icon" id="tipoIcone"></span>
+            <select id="fTipo">
+              <option value="Celular">Celular</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Relógio">Relógio</option>
+              <option value="Fones">Fones</option>
+            </select>
+          </div>
         </div>
         <div class="field"><label for="fSku">Modelo/SKU</label><input type="text" id="fSku" placeholder="Ex: SM-X710"></div>
       </div>
-      <div class="field"><label for="fPecas">Peças</label><textarea id="fPecas" placeholder="Ex: Tela, bateria…"></textarea></div>
-      <div class="field-grid-2">
-        <div class="field"><label for="fGarantia">Garantia</label><input type="text" id="fGarantia" placeholder="Ex: Sim / Não / 90 dias"></div>
-        <div class="field"><label for="fPedido">Nº do Pedido</label><input type="text" id="fPedido" placeholder="Ex: PD-10234"></div>
+      <div class="field">
+        <label for="fPecasInput">Peças</label>
+        <div class="tag-input" id="pecasTagWrap">
+          <div class="pecas-chips" id="pecasChips"></div>
+          <input type="text" id="fPecasInput" placeholder="Cole ou digite e aperte Enter / vírgula">
+        </div>
+        <div class="tag-input-hint">Cole vários códigos de uma vez (separados por vírgula ou linha) que cada um vira uma etiqueta.</div>
+      </div>
+      <div class="field">
+        <label for="fGarantia">Garantia</label>
+        <select id="fGarantia" class="garantia-select">
+          <option value="LP">LP</option>
+          <option value="OW">OW</option>
+        </select>
       </div>
       <div class="field-grid-2">
         <div class="field">
@@ -346,6 +442,21 @@
             <option value="Pago parcialmente">Pago parcialmente</option>
             <option value="Pago">Pago</option>
           </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="fComprovante">Comprovante</label>
+        <label class="file-drop" id="comprovanteDrop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+          <span id="comprovanteNomeArquivo">Clique para anexar (imagem ou PDF)</span>
+          <input type="file" id="fComprovante" accept="image/*,application/pdf">
+        </label>
+        <div class="comprovante-atual" id="comprovanteAtualWrap" hidden>
+          <a id="comprovanteAtualLink" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            Ver comprovante já anexado
+          </a>
         </div>
       </div>
 
@@ -391,11 +502,22 @@
   var STATUS_OPCOES = ['Pendente', 'Pedido criado', 'Q&A Criado', 'Peças entregues'];
   var PAG_OPCOES = ['---', 'Não pago', 'Pago parcialmente', 'Pago'];
 
+  var ICONES_TIPO = {
+    'Celular': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"></rect><line x1="11" y1="18" x2="13" y2="18"></line></svg>',
+    'Tablet': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="11" y1="18.5" x2="13" y2="18.5"></line></svg>',
+    'Relógio': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"></circle><polyline points="12 9 12 12 13.5 13.5"></polyline><path d="M9 3h6M9 21h6"></path></svg>',
+    'Fones': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>'
+  };
+  var GARANTIA_CLASS = { 'LP': 'garantia-LP', 'OW': 'garantia-OW' };
+
   var el = {};
   ['statusLabel','btnRefresh','btnConfig','statTotal','statPendente','statAndamento','statEntregue',
    'filtroBusca','filtroTipo','filtroStatus','filtroPagamento','btnNovo','tbody','emptyState',
-   'modalPedido','fecharModalPedido','modalTitulo','fData','fCliente','fTipo','fSku','fPecas',
-   'fGarantia','fPedido','fStatus','fPagamento','formErro','cancelarPedido','salvarPedido',
+   'modalPedido','fecharModalPedido','modalTitulo','fData','fCliente','fTipo','tipoIcone','fSku',
+   'pecasTagWrap','pecasChips','fPecasInput',
+   'fGarantia','fStatus','fPagamento',
+   'fComprovante','comprovanteNomeArquivo','comprovanteAtualWrap','comprovanteAtualLink',
+   'formErro','cancelarPedido','salvarPedido',
    'modalConfig','fecharModalConfig','fApiUrl','cancelarConfig','salvarConfig','toast'
   ].forEach(function (id) { el[id] = document.getElementById(id); });
 
@@ -484,16 +606,18 @@
 
       tr.appendChild(criarTd(p['Data'] || '—', 'mono'));
       tr.appendChild(criarTd(p['Cód. Cliente'] || '—'));
-      tr.appendChild(criarTd(p['Tipo de Produto'] || '—'));
+      tr.appendChild(criarTdTipo(p['Tipo de Produto']));
       tr.appendChild(criarTd(p['Modelo/SKU'] || '—', 'mono'));
-      tr.appendChild(criarTd(p['Peças'] || '—', null, 'pecas-cell'));
-      tr.appendChild(criarTd(p['Garantia'] || '—'));
-      tr.appendChild(criarTd(p['Pedido'] || '—', null, 'pedido-num'));
+      tr.appendChild(criarTdPecas(p['Peças']));
+      tr.appendChild(criarTdGarantia(p['Garantia']));
+      tr.appendChild(criarTdPedido(p));
 
       tr.appendChild(criarTdSelect(p, 'Status', STATUS_OPCOES, STATUS_CLASS, statusSlug));
       tr.appendChild(criarTdSelect(p, 'Pagamento', PAG_OPCOES, PAG_CLASS, function (v) {
         return v === '---' ? '---' : v.replace(/\s+/g, '');
       }));
+
+      tr.appendChild(criarTdComprovante(p['Comprovante']));
 
       var tdAcoes = document.createElement('td');
       var acoes = document.createElement('div');
@@ -524,6 +648,84 @@
     if (cls) td.classList.add(cls);
     if (extraCls) td.classList.add(extraCls);
     td.textContent = texto;
+    return td;
+  }
+
+  function criarTdPecas(valor) {
+    var td = document.createElement('td');
+    td.className = 'pecas-cell';
+    var itens = (valor || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!itens.length) { td.textContent = '—'; return td; }
+    var wrap = document.createElement('div');
+    wrap.className = 'pecas-chips';
+    itens.forEach(function (item) {
+      var chip = document.createElement('span');
+      chip.className = 'pecas-chip-mini';
+      chip.textContent = item;
+      wrap.appendChild(chip);
+    });
+    td.appendChild(wrap);
+    return td;
+  }
+
+  function criarTdComprovante(url) {
+    var td = document.createElement('td');
+    if (!url) { td.textContent = '—'; return td; }
+    var link = document.createElement('a');
+    link.className = 'comprovante-link';
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.title = 'Ver comprovante';
+    link.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+    td.appendChild(link);
+    return td;
+  }
+
+  function criarTdTipo(tipo) {
+    var td = document.createElement('td');
+    var wrap = document.createElement('div');
+    wrap.className = 'tipo-cell';
+    var icone = document.createElement('span');
+    icone.className = 'select-icon';
+    icone.innerHTML = ICONES_TIPO[tipo] || '';
+    var texto = document.createElement('span');
+    texto.textContent = tipo || '—';
+    wrap.appendChild(icone);
+    wrap.appendChild(texto);
+    td.appendChild(wrap);
+    return td;
+  }
+
+  function criarTdGarantia(valor) {
+    var td = document.createElement('td');
+    if (!valor) { td.textContent = '—'; return td; }
+    var chip = document.createElement('span');
+    chip.className = 'garantia-chip-mini ' + (GARANTIA_CLASS[valor] || '');
+    chip.textContent = valor;
+    td.appendChild(chip);
+    return td;
+  }
+
+  function criarTdPedido(pedido) {
+    var td = document.createElement('td');
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'pedido-input-cell';
+    input.placeholder = 'Preencher nº';
+    input.value = pedido['Pedido'] || '';
+    var valorAnterior = input.value;
+    function salvar() {
+      var novoValor = input.value.trim();
+      if (novoValor === valorAnterior) return;
+      apiPost({ action: 'update', id: pedido.ID, data: { 'Pedido': novoValor } }).then(function (res) {
+        if (res.ok) { pedido['Pedido'] = novoValor; valorAnterior = novoValor; toast('Nº do pedido salvo', 'ok'); }
+        else { input.value = valorAnterior; toast('Não foi possível salvar', 'err'); }
+      });
+    }
+    input.addEventListener('blur', salvar);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') input.blur(); });
+    td.appendChild(input);
     return td;
   }
 
@@ -563,19 +765,94 @@
     });
   }
 
+  // -------- Tags de Peças --------
+  var pecasTags = [];
+
+  function renderPecasTags() {
+    el.pecasChips.innerHTML = '';
+    pecasTags.forEach(function (tag, i) {
+      var chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      var texto = document.createElement('span');
+      texto.textContent = tag;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.title = 'Remover';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+      btn.onclick = function () { pecasTags.splice(i, 1); renderPecasTags(); };
+      chip.appendChild(texto);
+      chip.appendChild(btn);
+      el.pecasChips.appendChild(chip);
+    });
+  }
+
+  function adicionarPecasTexto(texto) {
+    texto.split(/[,\n]/).map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (tag) {
+      if (pecasTags.indexOf(tag) === -1) pecasTags.push(tag);
+    });
+    renderPecasTags();
+  }
+
+  el.fPecasInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
+      if (el.fPecasInput.value.trim()) {
+        e.preventDefault();
+        adicionarPecasTexto(el.fPecasInput.value);
+        el.fPecasInput.value = '';
+      }
+    } else if (e.key === 'Backspace' && !el.fPecasInput.value && pecasTags.length) {
+      pecasTags.pop();
+      renderPecasTags();
+    }
+  });
+  el.fPecasInput.addEventListener('paste', function (e) {
+    var texto = (e.clipboardData || window.clipboardData).getData('text');
+    if (texto && /[,\n]/.test(texto)) {
+      e.preventDefault();
+      adicionarPecasTexto(texto);
+    }
+  });
+  el.fPecasInput.addEventListener('blur', function () {
+    if (el.fPecasInput.value.trim()) { adicionarPecasTexto(el.fPecasInput.value); el.fPecasInput.value = ''; }
+    el.pecasTagWrap.classList.remove('focused');
+  });
+  el.fPecasInput.addEventListener('focus', function () { el.pecasTagWrap.classList.add('focused'); });
+  el.pecasTagWrap.addEventListener('click', function () { el.fPecasInput.focus(); });
+
+  function atualizarIconeTipo() {
+    el.tipoIcone.innerHTML = ICONES_TIPO[el.fTipo.value] || '';
+  }
+  el.fTipo.addEventListener('change', atualizarIconeTipo);
+
+  function atualizarClasseGarantia() {
+    el.fGarantia.className = 'garantia-select ' + (GARANTIA_CLASS[el.fGarantia.value] || '');
+  }
+  el.fGarantia.addEventListener('change', atualizarClasseGarantia);
+
   // -------- Modal Pedido --------
   function abrirModalPedido(pedido) {
     editandoId = pedido ? pedido.ID : null;
     el.modalTitulo.textContent = pedido ? 'Editar Pedido' : 'Novo Pedido';
     el.fData.value = pedido ? converterParaInputDate(pedido['Data']) : new Date().toISOString().slice(0, 10);
     el.fCliente.value = pedido ? pedido['Cód. Cliente'] || '' : '';
-    el.fTipo.value = pedido ? pedido['Tipo de Produto'] || 'Tablet' : 'Tablet';
+    el.fTipo.value = pedido ? pedido['Tipo de Produto'] || 'Celular' : 'Celular';
+    atualizarIconeTipo();
     el.fSku.value = pedido ? pedido['Modelo/SKU'] || '' : '';
-    el.fPecas.value = pedido ? pedido['Peças'] || '' : '';
-    el.fGarantia.value = pedido ? pedido['Garantia'] || '' : '';
-    el.fPedido.value = pedido ? pedido['Pedido'] || '' : '';
+    pecasTags = pedido && pedido['Peças'] ? pedido['Peças'].split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [];
+    el.fPecasInput.value = '';
+    renderPecasTags();
+    el.fGarantia.value = pedido ? pedido['Garantia'] || 'LP' : 'LP';
+    atualizarClasseGarantia();
     el.fStatus.value = pedido ? pedido['Status'] || 'Pendente' : 'Pendente';
     el.fPagamento.value = pedido ? pedido['Pagamento'] || '---' : '---';
+    el.fComprovante.value = '';
+    el.comprovanteNomeArquivo.textContent = 'Clique para anexar (imagem ou PDF)';
+    if (pedido && pedido['Comprovante']) {
+      el.comprovanteAtualLink.href = pedido['Comprovante'];
+      el.comprovanteAtualWrap.hidden = false;
+    } else {
+      el.comprovanteAtualWrap.hidden = true;
+    }
     el.formErro.textContent = '';
     el.modalPedido.classList.add('open');
   }
@@ -590,29 +867,60 @@
 
   function fecharModalPedido() { el.modalPedido.classList.remove('open'); }
 
+  el.fComprovante.addEventListener('change', function () {
+    var arquivo = el.fComprovante.files[0];
+    el.comprovanteNomeArquivo.textContent = arquivo ? arquivo.name : 'Clique para anexar (imagem ou PDF)';
+  });
+
+  function arquivoParaBase64(arquivo) {
+    return new Promise(function (resolve, reject) {
+      var leitor = new FileReader();
+      leitor.onload = function () { resolve(String(leitor.result).split(',')[1]); };
+      leitor.onerror = function () { reject(leitor.error); };
+      leitor.readAsDataURL(arquivo);
+    });
+  }
+
   function salvarPedidoModal() {
-    if (!el.fCliente.value.trim() || !el.fPedido.value.trim()) {
-      el.formErro.textContent = 'Preencha ao menos Cód. Cliente e Nº do Pedido.';
+    if (!el.fCliente.value.trim()) {
+      el.formErro.textContent = 'Preencha ao menos o Cód. Cliente.';
       return;
     }
+    var arquivo = el.fComprovante.files[0];
+    if (arquivo && arquivo.size > 8 * 1024 * 1024) {
+      el.formErro.textContent = 'O comprovante deve ter até 8 MB.';
+      return;
+    }
+
     var dados = {
       'Data': el.fData.value,
       'Cód. Cliente': el.fCliente.value.trim(),
       'Tipo de Produto': el.fTipo.value,
       'Modelo/SKU': el.fSku.value.trim(),
-      'Peças': el.fPecas.value.trim(),
-      'Garantia': el.fGarantia.value.trim(),
-      'Pedido': el.fPedido.value.trim(),
+      'Peças': (function () {
+        if (el.fPecasInput.value.trim()) { adicionarPecasTexto(el.fPecasInput.value); el.fPecasInput.value = ''; }
+        return pecasTags.join(', ');
+      })(),
+      'Garantia': el.fGarantia.value,
       'Status': el.fStatus.value,
       'Pagamento': el.fPagamento.value
     };
 
     el.salvarPedido.disabled = true;
-    var acaoPromise = editandoId
-      ? apiPost({ action: 'update', id: editandoId, data: dados })
-      : apiPost({ action: 'create', data: dados });
 
-    acaoPromise.then(function (res) {
+    var preparar = arquivo
+      ? arquivoParaBase64(arquivo).then(function (base64) {
+          dados.ComprovanteBase64 = base64;
+          dados.ComprovanteNome = arquivo.name;
+          dados.ComprovanteTipo = arquivo.type || 'application/octet-stream';
+        })
+      : Promise.resolve();
+
+    preparar.then(function () {
+      return editandoId
+        ? apiPost({ action: 'update', id: editandoId, data: dados })
+        : apiPost({ action: 'create', data: dados });
+    }).then(function (res) {
       el.salvarPedido.disabled = false;
       if (res.ok) {
         fecharModalPedido();
