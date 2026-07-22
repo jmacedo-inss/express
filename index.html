@@ -322,7 +322,15 @@
 #pedidosApp .btn-ghost:hover { border-color: var(--danger); color: var(--danger); }
 #pedidosApp .btn-confirm { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--accent-ink); border-color: transparent; }
 #pedidosApp .btn-confirm:hover { transform: translateY(-1px); }
+#pedidosApp .btn-confirm:disabled { opacity: 0.75; cursor: default; transform:none; }
 #pedidosApp .form-error { color: var(--danger); font-size:0.8em; margin-top:0.5em; min-height:1.1em; }
+#pedidosApp #btnEntrar { display:flex; align-items:center; justify-content:center; gap:0.55em; }
+#pedidosApp .btn-spinner {
+  width: 1.05em; height: 1.05em; border-radius: 50%; flex-shrink:0;
+  border: 0.16em solid rgba(255,255,255,0.4); border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+}
+#pedidosApp .btn-spinner[hidden] { display: none; }
 
 #pedidosApp .toast {
   position: fixed; bottom: 1.5em; right: 1.5em; z-index: 60;
@@ -468,7 +476,7 @@
       <div class="field"><label for="loginUsuario">Usuário</label><input type="text" id="loginUsuario" autocomplete="username"></div>
       <div class="field"><label for="loginSenha">Senha</label><input type="password" id="loginSenha" autocomplete="current-password"></div>
       <div class="form-error" id="loginErro"></div>
-      <button class="btn-confirm" id="btnEntrar" style="width:100%;">Entrar</button>
+      <button class="btn-confirm" id="btnEntrar" style="width:100%;"><span class="btn-spinner" id="btnEntrarSpinner" hidden></span><span id="btnEntrarTexto">Entrar</span></button>
     </div>
   </div>
 
@@ -842,7 +850,7 @@
    'historicoBox','historicoLista',
    'formErro','cancelarPedido','salvarPedido',
    'modalConfig','fecharModalConfig','fApiUrl','cancelarConfig','salvarConfig','toast',
-   'loginOverlay','loginUsuario','loginSenha','loginErro','btnEntrar',
+   'loginOverlay','loginUsuario','loginSenha','loginErro','btnEntrar','btnEntrarSpinner','btnEntrarTexto',
    'userChip','userAvatar','userChipNome','userDropdown','userDropdownNome','userDropdownNivel',
    'btnAbrirTrocarSenha','btnAbrirUsuarios','btnSair',
    'modalSenha','fecharModalSenha','senhaAtualInput','senhaNovaInput','senhaNovaConfirmInput','senhaErro','cancelarSenha','salvarSenha',
@@ -1007,15 +1015,21 @@
     carregar();
   }
 
+  function definirCarregandoLogin(carregando) {
+    el.btnEntrar.disabled = carregando;
+    el.btnEntrarSpinner.hidden = !carregando;
+    el.btnEntrarTexto.textContent = carregando ? 'Entrando…' : 'Entrar';
+  }
+
   function fazerLogin() {
     var usuario = el.loginUsuario.value.trim();
     var senha = el.loginSenha.value;
     if (!usuario || !senha) { el.loginErro.textContent = 'Preencha usuário e senha.'; return; }
-    el.btnEntrar.disabled = true;
+    definirCarregandoLogin(true);
     el.loginErro.textContent = '';
     if (!apiUrl) {
       el.loginErro.textContent = 'A URL do sistema ainda não foi configurada. Fale com o administrador.';
-      el.btnEntrar.disabled = false;
+      definirCarregandoLogin(false);
       return;
     }
     fetch(apiUrl, {
@@ -1024,7 +1038,7 @@
       body: JSON.stringify({ action: 'login', usuario: usuario, senha: senha })
     }).then(function (r) { return r.json(); })
       .then(function (res) {
-        el.btnEntrar.disabled = false;
+        definirCarregandoLogin(false);
         if (res.ok) {
           salvarSessaoLocal(res);
           mostrarApp();
@@ -1032,7 +1046,7 @@
           el.loginErro.textContent = res.error || 'Não foi possível entrar.';
         }
       }).catch(function (err) {
-        el.btnEntrar.disabled = false;
+        definirCarregandoLogin(false);
         el.loginErro.textContent = 'Erro de conexão: ' + err.message;
       });
   }
@@ -1828,6 +1842,43 @@
     if (parte2) resultado += '-' + parte2;
     return resultado;
   }
+  function digitosWhatsapp(valor) { return String(valor || '').replace(/\D/g, '').slice(0, 11); }
+
+  function posicaoAposDigito(textoFormatado, quantidadeDigitos) {
+    if (quantidadeDigitos <= 0) return 0;
+    var contados = 0;
+    for (var i = 0; i < textoFormatado.length; i++) {
+      if (/\d/.test(textoFormatado[i])) {
+        contados++;
+        if (contados === quantidadeDigitos) return i + 1;
+      }
+    }
+    return textoFormatado.length;
+  }
+
+  el.fWhatsapp.addEventListener('keydown', function (e) {
+    if (e.key !== 'Backspace' && e.key !== 'Delete') return;
+    if (el.fWhatsapp.selectionStart !== el.fWhatsapp.selectionEnd) return; // há texto selecionado: deixa o padrão agir
+
+    var pos = el.fWhatsapp.selectionStart;
+    var digitos = digitosWhatsapp(el.fWhatsapp.value);
+    var digitosAntesDoCursor = digitosWhatsapp(el.fWhatsapp.value.slice(0, pos)).length;
+    var novaQuantidadeAntes = digitosAntesDoCursor;
+
+    if (e.key === 'Backspace') {
+      if (digitosAntesDoCursor === 0) return;
+      digitos = digitos.slice(0, digitosAntesDoCursor - 1) + digitos.slice(digitosAntesDoCursor);
+      novaQuantidadeAntes = digitosAntesDoCursor - 1;
+    } else {
+      if (digitosAntesDoCursor >= digitos.length) return;
+      digitos = digitos.slice(0, digitosAntesDoCursor) + digitos.slice(digitosAntesDoCursor + 1);
+    }
+
+    e.preventDefault();
+    el.fWhatsapp.value = formatarWhatsapp(digitos);
+    var novoCursor = posicaoAposDigito(el.fWhatsapp.value, novaQuantidadeAntes);
+    el.fWhatsapp.setSelectionRange(novoCursor, novoCursor);
+  });
   el.fWhatsapp.addEventListener('input', function () {
     el.fWhatsapp.value = formatarWhatsapp(el.fWhatsapp.value);
   });
