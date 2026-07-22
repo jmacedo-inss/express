@@ -190,10 +190,17 @@
 #pedidosApp table.pedidos tbody td.mono { font-family: var(--font-mono); color: var(--text-dim); white-space:nowrap; }
 #pedidosApp table.pedidos tbody td.pedido-num { font-family: var(--font-mono); font-weight:600; color: var(--text); white-space:nowrap; }
 #pedidosApp table.pedidos tbody td.pecas-cell { max-width: 18em; white-space: normal; color: var(--text-dim); }
-#pedidosApp .pecas-chips { display:flex; flex-wrap:wrap; gap: 0.3em; }
+#pedidosApp .pecas-chips { display:flex; flex-wrap:wrap; gap: 0.25em; }
 #pedidosApp .pecas-chip-mini {
   display:inline-flex; align-items:center; background: var(--panel-3); border:1px solid var(--border);
-  color: var(--text-dim); border-radius: 0.45em; padding: 0.15em 0.5em; font-size: 0.8em; font-weight:600; white-space:nowrap;
+  color: var(--text-dim); border-radius: 0.4em; padding: 0.1em 0.42em; font-size: 0.7em; font-weight:600; white-space:nowrap;
+}
+#pedidosApp table.pedidos tbody td.criado-por-cell { font-size: 0.78em; }
+#pedidosApp .data-wrap { display:flex; align-items:center; gap: 0.4em; white-space:nowrap; }
+#pedidosApp .data-texto { font-family: var(--font-mono); font-size: 0.8em; color: var(--text-dim); }
+#pedidosApp .hora-tag {
+  font-family: var(--font-mono); font-size: 0.68em; font-weight:600; color: var(--text-faint);
+  background: var(--panel-3); border: 1px solid var(--border); border-radius: 0.35em; padding: 0.08em 0.4em;
 }
 
 /* ---------- Tag input (Peças) ---------- */
@@ -1609,7 +1616,7 @@
       var tr = document.createElement('tr');
 
       tr.appendChild(criarTdCheckbox(p));
-      tr.appendChild(criarTd(p['Data'] || '—', 'mono'));
+      tr.appendChild(criarTdData(p['Data']));
       tr.appendChild(criarTd(p['Nome'] ? String(p['Nome']).toUpperCase() : '—', null, 'nome-cell'));
       tr.appendChild(criarTdWhatsapp(p['WhatsApp']));
       tr.appendChild(criarTdTipo(p['Tipo de Produto']));
@@ -1624,7 +1631,7 @@
       }));
 
       tr.appendChild(criarTdComprovante(p['Comprovante']));
-      tr.appendChild(criarTd(p['Criado Por'] || '—', 'mono'));
+      tr.appendChild(criarTd(p['Criado Por'] || '—', 'mono', 'criado-por-cell'));
 
       var tdAcoes = document.createElement('td');
       var acoes = document.createElement('div');
@@ -1689,6 +1696,26 @@
     if (cls) td.classList.add(cls);
     if (extraCls) td.classList.add(extraCls);
     td.textContent = texto;
+    return td;
+  }
+
+  function criarTdData(valor) {
+    var td = document.createElement('td');
+    if (!valor) { td.textContent = '—'; return td; }
+    var partes = String(valor).split(' ');
+    var wrap = document.createElement('div');
+    wrap.className = 'data-wrap';
+    var spanData = document.createElement('span');
+    spanData.className = 'data-texto';
+    spanData.textContent = partes[0] || String(valor);
+    wrap.appendChild(spanData);
+    if (partes[1]) {
+      var spanHora = document.createElement('span');
+      spanHora.className = 'hora-tag';
+      spanHora.textContent = partes[1];
+      wrap.appendChild(spanHora);
+    }
+    td.appendChild(wrap);
     return td;
   }
 
