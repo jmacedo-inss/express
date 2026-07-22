@@ -654,7 +654,7 @@
   function criarTdPecas(valor) {
     var td = document.createElement('td');
     td.className = 'pecas-cell';
-    var itens = (valor || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    var itens = String(valor || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     if (!itens.length) { td.textContent = '—'; return td; }
     var wrap = document.createElement('div');
     wrap.className = 'pecas-chips';
@@ -838,7 +838,7 @@
     el.fTipo.value = pedido ? pedido['Tipo de Produto'] || 'Celular' : 'Celular';
     atualizarIconeTipo();
     el.fSku.value = pedido ? pedido['Modelo/SKU'] || '' : '';
-    pecasTags = pedido && pedido['Peças'] ? pedido['Peças'].split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [];
+    pecasTags = pedido && pedido['Peças'] ? String(pedido['Peças']).split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [];
     el.fPecasInput.value = '';
     renderPecasTags();
     el.fGarantia.value = pedido ? pedido['Garantia'] || 'LP' : 'LP';
