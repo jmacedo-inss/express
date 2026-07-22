@@ -147,7 +147,24 @@
   box-shadow: var(--shadow); overflow: hidden;
 }
 #pedidosApp .table-scroll { overflow-x: auto; }
-#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 82em; }
+#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 85em; }
+#pedidosApp th.check-col, #pedidosApp td.check-col { width: 2.6em; text-align:center; padding-left: 0.6em; padding-right: 0.6em; }
+#pedidosApp input[type="checkbox"].row-check, #pedidosApp input[type="checkbox"]#checkTodos {
+  width: 1.05em; height: 1.05em; cursor:pointer; accent-color: var(--accent); vertical-align:middle;
+}
+#pedidosApp .bulk-bar {
+  display:flex; align-items:center; gap: 0.8em; background: var(--danger-dim); border:1px solid var(--danger);
+  border-radius: var(--radius); padding: 0.6em 0.9em; margin-bottom: 0.9em;
+}
+#pedidosApp .bulk-bar span { font-weight:700; color: var(--danger); font-size: 0.86em; }
+#pedidosApp .btn-danger-solid {
+  margin-left:auto; background: var(--danger); color:#fff; border:none; border-radius: 0.55em;
+  padding: 0.5em 0.9em; font-weight:700; font-size: 0.85em; cursor:pointer; display:flex; align-items:center; gap:0.4em;
+  font-family: var(--font-display); transition: opacity .15s ease, transform .15s ease;
+}
+#pedidosApp .btn-danger-solid svg { width: 1em; height: 1em; }
+#pedidosApp .btn-danger-solid:hover { opacity: 0.88; transform: translateY(-1px); }
+#pedidosApp .btn-danger-solid:disabled { opacity: 0.6; cursor:default; transform:none; }
 #pedidosApp table.pedidos thead th {
   position: sticky; top:0; background: var(--panel-2); z-index: 2;
   text-align:left; font-size: 0.74em; color: var(--text-faint); text-transform: uppercase; letter-spacing:0.03em;
@@ -370,11 +387,18 @@
       <button class="btn-primary" id="btnNovo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Novo Pedido</button>
     </section>
 
+    <section class="bulk-bar" id="bulkBar" hidden>
+      <span id="bulkCount">0 selecionados</span>
+      <button class="btn-clear" id="bulkDesmarcar">Cancelar seleção</button>
+      <button class="btn-danger-solid" id="bulkExcluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>Excluir selecionados</button>
+    </section>
+
     <section class="table-shell">
       <div class="table-scroll">
         <table class="pedidos">
           <thead>
             <tr>
+              <th class="check-col"><input type="checkbox" id="checkTodos" title="Selecionar todos"></th>
               <th>Data</th>
               <th>Cód. Cliente</th>
               <th>Tipo de produto</th>
@@ -528,6 +552,7 @@
   var el = {};
   ['statusLabel','btnRefresh','btnConfig','statTotal','statPendente','statAndamento','statEntregue',
    'filtroBusca','filtroTipo','filtroStatus','filtroPagamento','btnLimparFiltros','btnNovo','tbody','emptyState',
+   'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir',
    'modalPedido','fecharModalPedido','modalTitulo','fData','fCliente','fTipo','tipoIcone','fSku',
    'pecasTagWrap','pecasChips','fPecasInput',
    'fGarantia','fStatus','fPagamento',
@@ -539,6 +564,8 @@
   var apiUrl = window.localStorage ? (localStorage.getItem('pedidos_api_url') || '') : '';
   var pedidos = [];
   var editandoId = null;
+  var selecionados = new Set();
+  var ultimosFiltrados = [];
 
   function toast(msg, tipo) {
     el.toast.textContent = msg;
@@ -586,6 +613,9 @@
 
   // -------- Render --------
   function renderizar() {
+    var idsValidos = new Set(pedidos.map(function (p) { return p.ID; }));
+    Array.from(selecionados).forEach(function (id) { if (!idsValidos.has(id)) selecionados.delete(id); });
+
     var busca = el.filtroBusca.value.trim().toLowerCase();
     var fTipo = el.filtroTipo.value;
     var fStatus = el.filtroStatus.value;
@@ -601,6 +631,7 @@
       }
       return true;
     });
+    ultimosFiltrados = filtrados;
 
     el.tbody.innerHTML = '';
     el.emptyState.hidden = filtrados.length !== 0;
@@ -619,6 +650,7 @@
     filtrados.forEach(function (p) {
       var tr = document.createElement('tr');
 
+      tr.appendChild(criarTdCheckbox(p));
       tr.appendChild(criarTd(p['Data'] || '—', 'mono'));
       tr.appendChild(criarTd(p['Cód. Cliente'] || '—'));
       tr.appendChild(criarTdTipo(p['Tipo de Produto']));
@@ -656,6 +688,40 @@
 
       el.tbody.appendChild(tr);
     });
+
+    atualizarBarraSelecao();
+    atualizarCheckTodos();
+  }
+
+  function criarTdCheckbox(pedido) {
+    var td = document.createElement('td');
+    td.className = 'check-col';
+    var chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.className = 'row-check';
+    chk.checked = selecionados.has(pedido.ID);
+    chk.onchange = function () {
+      if (chk.checked) selecionados.add(pedido.ID);
+      else selecionados.delete(pedido.ID);
+      atualizarBarraSelecao();
+      atualizarCheckTodos();
+    };
+    td.appendChild(chk);
+    return td;
+  }
+
+  function atualizarBarraSelecao() {
+    var n = selecionados.size;
+    el.bulkBar.hidden = n === 0;
+    el.bulkCount.textContent = n + (n === 1 ? ' selecionado' : ' selecionados');
+  }
+
+  function atualizarCheckTodos() {
+    var todosMarcados = ultimosFiltrados.length > 0 && ultimosFiltrados.every(function (p) { return selecionados.has(p.ID); });
+    var algumMarcado = ultimosFiltrados.some(function (p) { return selecionados.has(p.ID); });
+    el.checkTodos.checked = todosMarcados;
+    el.checkTodos.indeterminate = !todosMarcados && algumMarcado;
+    el.checkTodos.disabled = ultimosFiltrados.length === 0;
   }
 
   function criarTd(texto, cls, extraCls) {
@@ -777,6 +843,22 @@
         renderizar();
         toast('Pedido excluído', 'ok');
       } else toast('Não foi possível excluir', 'err');
+    });
+  }
+
+  function excluirSelecionados() {
+    var ids = Array.from(selecionados);
+    if (!ids.length) return;
+    if (!confirm('Excluir ' + ids.length + ' pedido(s) selecionado(s)? Essa ação não pode ser desfeita.')) return;
+    el.bulkExcluir.disabled = true;
+    apiPost({ action: 'deleteMany', ids: ids }).then(function (res) {
+      el.bulkExcluir.disabled = false;
+      if (res.ok) {
+        pedidos = pedidos.filter(function (p) { return ids.indexOf(p.ID) === -1; });
+        selecionados.clear();
+        renderizar();
+        toast(ids.length + ' pedido(s) excluído(s)', 'ok');
+      } else toast('Não foi possível excluir os pedidos selecionados', 'err');
     });
   }
 
@@ -974,6 +1056,16 @@
     el.filtroPagamento.value = '';
     renderizar();
   };
+  el.checkTodos.onchange = function () {
+    var marcarTodos = el.checkTodos.checked;
+    ultimosFiltrados.forEach(function (p) {
+      if (marcarTodos) selecionados.add(p.ID);
+      else selecionados.delete(p.ID);
+    });
+    renderizar();
+  };
+  el.bulkDesmarcar.onclick = function () { selecionados.clear(); renderizar(); };
+  el.bulkExcluir.onclick = excluirSelecionados;
   el.fecharModalPedido.onclick = fecharModalPedido;
   el.cancelarPedido.onclick = fecharModalPedido;
   el.salvarPedido.onclick = salvarPedidoModal;
