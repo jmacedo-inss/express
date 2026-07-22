@@ -242,11 +242,15 @@
 #pedidosApp .comprovante-atual a:hover { text-decoration:underline; }
 #pedidosApp .comprovante-atual a svg { width: 1em; height: 1em; }
 #pedidosApp .comprovante-link {
-  width: 2em; height: 2em; border-radius: 0.5em; background: var(--panel-2); border:1px solid var(--border);
+  width: 1.7em; height: 1.7em; border-radius: 0.5em; background: var(--panel-2); border:1px solid var(--border);
   display:flex; align-items:center; justify-content:center; color: var(--text-dim); transition: border-color .15s ease, color .15s ease;
+  flex-shrink: 0;
 }
 #pedidosApp .comprovante-link:hover { border-color: var(--accent); color: var(--accent); }
-#pedidosApp .comprovante-link svg { width: 1.05em; height: 1.05em; }
+#pedidosApp .comprovante-link svg { width: 0.9em; height: 0.9em; }
+#pedidosApp .valor-pago-wrap { display:flex; align-items:center; gap: 0.5em; }
+#pedidosApp .valor-pago-texto { font-family: var(--font-mono); font-size: 0.85em; color: var(--text); font-weight:600; white-space:nowrap; }
+#pedidosApp .valor-pago-texto.vazio { color: var(--text-faint); font-weight:500; font-style:italic; }
 
 /* ---------- Nome (sempre maiúsculo) ---------- */
 #pedidosApp #fNome { text-transform: uppercase; }
@@ -602,7 +606,7 @@
               <th>Pedido</th>
               <th>Status</th>
               <th>Pagamento</th>
-              <th>Comprovante</th>
+              <th>Valor Pago</th>
               <th>Criado Por</th>
               <th>Ações</th>
             </tr>
@@ -685,6 +689,7 @@
           </select>
         </div>
       </div>
+      <div class="field"><label for="fValorPago">Valor Pago</label><input type="text" id="fValorPago" inputmode="numeric" placeholder="R$ 0,00"></div>
 
       <div class="field">
         <label for="fComprovante">Comprovante</label>
@@ -881,7 +886,7 @@
    'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir',
    'modalPedido','fecharModalPedido','modalTitulo','fData','fNome','fWhatsapp','fTipo','tipoIcone','fSku',
    'pecasTagWrap','pecasChips','fPecasInput',
-   'fGarantia','fPedido','fPedidoWrap','fStatus','fPagamento',
+   'fGarantia','fPedido','fPedidoWrap','fStatus','fPagamento','fValorPago',
    'fComprovante','comprovanteNomeArquivo','comprovanteAtualWrap','comprovanteAtualLink',
    'historicoBox','historicoLista',
    'formErro','cancelarPedido','salvarPedido',
@@ -1630,7 +1635,7 @@
         return v === '---' ? '---' : v.replace(/\s+/g, '');
       }));
 
-      tr.appendChild(criarTdComprovante(p['Comprovante']));
+      tr.appendChild(criarTdValorPago(p));
       tr.appendChild(criarTd(p['Criado Por'] || '—', 'mono', 'criado-por-cell'));
 
       var tdAcoes = document.createElement('td');
@@ -1763,6 +1768,37 @@
     link.title = 'Ver comprovante';
     link.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
     td.appendChild(link);
+    return td;
+  }
+
+  function criarTdValorPago(pedido) {
+    var td = document.createElement('td');
+    var wrap = document.createElement('div');
+    wrap.className = 'valor-pago-wrap';
+
+    var span = document.createElement('span');
+    if (pedido['Valor Pago']) {
+      span.className = 'valor-pago-texto';
+      span.textContent = pedido['Valor Pago'];
+    } else {
+      span.className = 'valor-pago-texto vazio';
+      span.textContent = '—';
+    }
+    wrap.appendChild(span);
+
+    var pago = pedido['Pagamento'] === 'Pago' || pedido['Pagamento'] === 'Pago parcialmente';
+    if (pago && pedido['Comprovante']) {
+      var link = document.createElement('a');
+      link.className = 'comprovante-link';
+      link.href = pedido['Comprovante'];
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.title = 'Ver comprovante';
+      link.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+      wrap.appendChild(link);
+    }
+
+    td.appendChild(wrap);
     return td;
   }
 
@@ -1938,6 +1974,21 @@
     if (parte2) resultado += '-' + parte2;
     return resultado;
   }
+
+  function formatarValorPago(valor) {
+    var digitos = String(valor || '').replace(/\D/g, '').slice(0, 12);
+    if (!digitos) return '';
+    digitos = digitos.replace(/^0+(?=\d)/, '');
+    while (digitos.length < 3) digitos = '0' + digitos;
+    var centavos = digitos.slice(-2);
+    var inteiro = digitos.slice(0, -2).replace(/^0+(?=\d)/, '') || '0';
+    inteiro = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return 'R$ ' + inteiro + ',' + centavos;
+  }
+  el.fValorPago.addEventListener('input', function () {
+    el.fValorPago.value = formatarValorPago(el.fValorPago.value);
+  });
+
   function digitosWhatsapp(valor) { return String(valor || '').replace(/\D/g, '').slice(0, 11); }
 
   function posicaoAposDigito(textoFormatado, quantidadeDigitos) {
@@ -2000,6 +2051,7 @@
     el.fPedidoWrap.hidden = (!pedido && sessao.nivel !== 'admin');
     el.fStatus.value = pedido ? pedido['Status'] || 'Pendente' : 'Pendente';
     el.fPagamento.value = pedido ? pedido['Pagamento'] || '---' : '---';
+    el.fValorPago.value = pedido && pedido['Valor Pago'] ? formatarValorPago(pedido['Valor Pago']) : '';
     el.fComprovante.value = '';
     el.comprovanteNomeArquivo.textContent = 'Clique para anexar (imagem ou PDF)';
     if (pedido && pedido['Comprovante']) {
@@ -2069,7 +2121,8 @@
       'Garantia': el.fGarantia.value,
       'Pedido': el.fPedido.value.trim(),
       'Status': el.fStatus.value,
-      'Pagamento': el.fPagamento.value
+      'Pagamento': el.fPagamento.value,
+      'Valor Pago': el.fValorPago.value.trim()
     };
 
     el.salvarPedido.disabled = true;
