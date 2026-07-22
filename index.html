@@ -424,6 +424,7 @@
 #pedidosApp .historico-item .cabecalho { display:flex; justify-content:space-between; gap:0.5em; font-weight:700; color: var(--text); margin-bottom: 0.15em; }
 #pedidosApp .historico-item .cabecalho .quando { font-weight:500; color: var(--text-faint); font-size: 0.92em; white-space:nowrap; }
 #pedidosApp .historico-item .desc { color: var(--text-dim); }
+#pedidosApp .historico-item .referencia { font-weight:700; color: var(--accent); font-size: 0.85em; margin-bottom: 0.2em; }
 #pedidosApp .historico-vazio { font-size: 0.8em; color: var(--text-faint); font-style:italic; }
 </style>
 </head>
@@ -466,6 +467,7 @@
           <div class="info"><div class="n" id="userDropdownNome">—</div><div class="u" id="userDropdownNivel">—</div></div>
           <button type="button" id="btnAbrirTrocarSenha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Trocar senha</button>
           <button type="button" id="btnAbrirUsuarios" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Gerenciar usuários</button>
+          <button type="button" id="btnAbrirHistoricoGeral" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Histórico geral</button>
           <button type="button" class="sair" id="btnSair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Sair</button>
         </div>
       </div>
@@ -716,6 +718,17 @@
     </div>
   </div>
 
+  <!-- Modal: histórico geral (admin) -->
+  <div class="modal-overlay" id="modalHistoricoGeral">
+    <div class="modal" style="max-width: 40em;">
+      <button class="modal-close" id="fecharModalHistoricoGeral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Histórico geral</h3>
+      <div class="config-note">Mostra as últimas alterações de todos os pedidos, inclusive de pedidos já excluídos.</div>
+      <div class="field"><input type="search" id="historicoGeralBusca" placeholder="Buscar por nome, pedido ou usuário…"></div>
+      <div class="historico-lista" id="historicoGeralLista" style="max-height: 26em;"></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
   </div>
 </div>
@@ -761,6 +774,7 @@
    'btnAbrirTrocarSenha','btnAbrirUsuarios','btnSair',
    'modalSenha','fecharModalSenha','senhaAtualInput','senhaNovaInput','senhaNovaConfirmInput','senhaErro','cancelarSenha','salvarSenha',
    'modalUsuarios','fecharModalUsuarios','btnNovoUsuario','usuariosTbody',
+   'btnAbrirHistoricoGeral','modalHistoricoGeral','fecharModalHistoricoGeral','historicoGeralBusca','historicoGeralLista',
    'modalUsuarioForm','fecharModalUsuarioForm','usuarioFormTitulo','ufNome','ufUsuario','ufSenha','ufNivel','ufAtivoWrap','ufAtivo','usuarioFormErro','cancelarUsuarioForm','salvarUsuarioForm'
   ].forEach(function (id) { el[id] = document.getElementById(id); });
 
@@ -840,6 +854,7 @@
     var ehAdmin = sessao.nivel === 'admin';
     el.btnConfig.hidden = !ehAdmin;
     el.btnAbrirUsuarios.hidden = !ehAdmin;
+    el.btnAbrirHistoricoGeral.hidden = !ehAdmin;
     carregar();
   }
 
@@ -1047,6 +1062,29 @@
   });
 
   // -------- Histórico do pedido --------
+  function criarItemHistorico(item, comReferencia) {
+    var div = document.createElement('div');
+    div.className = 'historico-item';
+    if (comReferencia) {
+      var ref = document.createElement('div');
+      ref.className = 'referencia';
+      ref.textContent = item.Referencia;
+      div.appendChild(ref);
+    }
+    var cabecalho = document.createElement('div');
+    cabecalho.className = 'cabecalho';
+    var quem = document.createElement('span'); quem.textContent = item.Usuario;
+    var quando = document.createElement('span'); quando.className = 'quando'; quando.textContent = item.DataHora;
+    cabecalho.appendChild(quem);
+    cabecalho.appendChild(quando);
+    var desc = document.createElement('div');
+    desc.className = 'desc';
+    desc.textContent = item.Descricao;
+    div.appendChild(cabecalho);
+    div.appendChild(desc);
+    return div;
+  }
+
   function carregarHistorico(pedidoId) {
     el.historicoBox.hidden = true;
     el.historicoLista.innerHTML = '';
@@ -1059,24 +1097,48 @@
         el.historicoLista.innerHTML = '<div class="historico-vazio">Nenhuma alteração registrada ainda.</div>';
         return;
       }
-      itens.forEach(function (item) {
-        var div = document.createElement('div');
-        div.className = 'historico-item';
-        var cabecalho = document.createElement('div');
-        cabecalho.className = 'cabecalho';
-        var quem = document.createElement('span'); quem.textContent = item.Usuario;
-        var quando = document.createElement('span'); quando.className = 'quando'; quando.textContent = item.DataHora;
-        cabecalho.appendChild(quem);
-        cabecalho.appendChild(quando);
-        var desc = document.createElement('div');
-        desc.className = 'desc';
-        desc.textContent = item.Descricao;
-        div.appendChild(cabecalho);
-        div.appendChild(desc);
-        el.historicoLista.appendChild(div);
-      });
+      itens.forEach(function (item) { el.historicoLista.appendChild(criarItemHistorico(item, false)); });
     });
   }
+
+  // -------- Histórico geral (admin) --------
+  var historicoGeralItens = [];
+
+  function abrirModalHistoricoGeral() {
+    el.userDropdown.classList.remove('open');
+    el.historicoGeralBusca.value = '';
+    el.modalHistoricoGeral.classList.add('open');
+    el.historicoGeralLista.innerHTML = '<div class="historico-vazio">Carregando…</div>';
+    apiPost({ action: 'historicoGeral' }).then(function (res) {
+      if (!res.ok) {
+        el.historicoGeralLista.innerHTML = '<div class="historico-vazio">' + (res.error || 'Não foi possível carregar.') + '</div>';
+        return;
+      }
+      historicoGeralItens = res.historico || [];
+      renderizarHistoricoGeral();
+    });
+  }
+  function fecharModalHistoricoGeral() { el.modalHistoricoGeral.classList.remove('open'); }
+
+  function renderizarHistoricoGeral() {
+    var termo = el.historicoGeralBusca.value.trim().toLowerCase();
+    var itens = historicoGeralItens.filter(function (item) {
+      if (!termo) return true;
+      var alvo = (item.Referencia + ' ' + item.Usuario + ' ' + item.Descricao).toLowerCase();
+      return alvo.indexOf(termo) !== -1;
+    });
+    el.historicoGeralLista.innerHTML = '';
+    if (!itens.length) {
+      el.historicoGeralLista.innerHTML = '<div class="historico-vazio">Nenhum registro encontrado.</div>';
+      return;
+    }
+    itens.forEach(function (item) { el.historicoGeralLista.appendChild(criarItemHistorico(item, true)); });
+  }
+
+  el.btnAbrirHistoricoGeral.onclick = abrirModalHistoricoGeral;
+  el.fecharModalHistoricoGeral.onclick = fecharModalHistoricoGeral;
+  el.historicoGeralBusca.addEventListener('input', renderizarHistoricoGeral);
+  el.modalHistoricoGeral.addEventListener('click', function (e) { if (e.target === el.modalHistoricoGeral) fecharModalHistoricoGeral(); });
 
   // -------- API --------
   function apiGet(paramsExtra) {
