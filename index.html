@@ -413,6 +413,31 @@
 }
 #pedidosApp .btn-add-usuario svg { width: 1em; height: 1em; }
 
+/* ---------- Seletor de unidade (admin) ---------- */
+#pedidosApp .unidade-seletor-wrap { display:flex; align-items:center; gap: 0.4em; }
+#pedidosApp .unidade-seletor-wrap[hidden] { display: none; }
+#pedidosApp .unidade-seletor-wrap svg { width: 1.1em; height: 1.1em; color: var(--text-dim); flex-shrink:0; }
+#pedidosApp #seletorUnidade {
+  height: 2.3em; padding: 0 1.8em 0 0.6em; border-radius: 0.65em; background: var(--panel);
+  border:1px solid var(--border); font-size: 0.84em; font-weight:600; color: var(--text); cursor:pointer;
+}
+#pedidosApp .unidade-fixa-chip {
+  display:flex; align-items:center; gap: 0.4em; height: 2.3em; padding: 0 0.8em; border-radius: 0.65em;
+  background: var(--panel); border:1px solid var(--border); font-size: 0.84em; font-weight:600; color: var(--text-dim);
+}
+#pedidosApp .unidade-fixa-chip[hidden] { display: none; }
+#pedidosApp .unidade-fixa-chip svg { width: 1.05em; height: 1.05em; }
+
+/* ---------- Gestão de unidades ---------- */
+#pedidosApp table.unidades { width:100%; border-collapse: collapse; font-size: 0.86em; }
+#pedidosApp table.unidades th {
+  text-align:left; font-size: 0.72em; color: var(--text-faint); text-transform:uppercase; letter-spacing:0.03em;
+  padding: 0.5em 0.5em; border-bottom: 1px solid var(--border);
+}
+#pedidosApp table.unidades td { padding: 0.5em; border-bottom: 1px solid var(--border-soft); vertical-align:middle; }
+#pedidosApp .avancado-toggle { font-size: 0.78em; color: var(--accent); cursor:pointer; font-weight:600; margin: 0.2em 0 0.8em; display:inline-block; }
+#pedidosApp .empty-inline { padding: 1.5em 0; text-align:center; color: var(--text-faint); font-size: 0.85em; }
+
 /* ---------- Histórico do pedido ---------- */
 #pedidosApp .historico-box { margin-top: 1.2em; border-top: 1px solid var(--border-soft); padding-top: 1em; }
 #pedidosApp .historico-box h4 {
@@ -459,6 +484,14 @@
       </div>
     </div>
     <div class="topbar-actions">
+      <div class="unidade-seletor-wrap" id="unidadeSeletorWrap" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
+        <select id="seletorUnidade"></select>
+      </div>
+      <div class="unidade-fixa-chip" id="unidadeFixaChip" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
+        <span id="unidadeFixaNome">—</span>
+      </div>
       <button class="icon-btn" id="btnRefresh" title="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
       <button class="icon-btn" id="btnConfig" title="Configurar URL da API" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
       <div class="user-menu-wrap">
@@ -467,6 +500,7 @@
           <div class="info"><div class="n" id="userDropdownNome">—</div><div class="u" id="userDropdownNivel">—</div></div>
           <button type="button" id="btnAbrirTrocarSenha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Trocar senha</button>
           <button type="button" id="btnAbrirUsuarios" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Gerenciar usuários</button>
+          <button type="button" id="btnAbrirUnidades" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Gerenciar unidades</button>
           <button type="button" id="btnAbrirHistoricoGeral" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Histórico geral</button>
           <button type="button" class="sair" id="btnSair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Sair</button>
         </div>
@@ -681,7 +715,7 @@
       <button class="btn-add-usuario" id="btnNovoUsuario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Novo Usuário</button>
       <div style="overflow-x:auto;">
         <table class="usuarios">
-          <thead><tr><th>Nome</th><th>Usuário</th><th>Nível</th><th>Status</th><th>Ações</th></tr></thead>
+          <thead><tr><th>Nome</th><th>Usuário</th><th>Nível</th><th>Unidade</th><th>Status</th><th>Ações</th></tr></thead>
           <tbody id="usuariosTbody"></tbody>
         </table>
       </div>
@@ -703,6 +737,10 @@
           <option value="admin">Admin</option>
         </select>
       </div>
+      <div class="field" id="ufUnidadeWrap">
+        <label for="ufUnidade">Unidade</label>
+        <select id="ufUnidade"></select>
+      </div>
       <div class="field" id="ufAtivoWrap" hidden>
         <label for="ufAtivo">Status</label>
         <select id="ufAtivo">
@@ -714,6 +752,41 @@
       <div class="modal-actions">
         <button class="btn-ghost" id="cancelarUsuarioForm">Cancelar</button>
         <button class="btn-confirm" id="salvarUsuarioForm">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: gerenciar unidades (admin) -->
+  <div class="modal-overlay" id="modalUnidades">
+    <div class="modal" style="max-width: 38em;">
+      <button class="modal-close" id="fecharModalUnidades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Gerenciar unidades</h3>
+      <button class="btn-add-usuario" id="btnNovaUnidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Nova Unidade</button>
+      <div style="overflow-x:auto;">
+        <table class="unidades">
+          <thead><tr><th>Nome</th><th>Criada em</th><th>Ações</th></tr></thead>
+          <tbody id="unidadesTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: nova/editar unidade -->
+  <div class="modal-overlay" id="modalUnidadeForm">
+    <div class="modal">
+      <button class="modal-close" id="fecharModalUnidadeForm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <h3><span id="unidadeFormTitulo">Nova Unidade</span></h3>
+      <div class="field"><label for="unfNome">Nome da unidade</label><input type="text" id="unfNome" placeholder="Ex: Unidade Centro"></div>
+      <div class="config-note" id="unfNotaCriacao">O sistema cria automaticamente uma planilha de pedidos nova e já estruturada para essa unidade.</div>
+      <span class="avancado-toggle" id="unfToggleAvancado">Usar uma planilha já existente (avançado)</span>
+      <div class="field" id="unfSpreadsheetWrap" hidden>
+        <label for="unfSpreadsheetId">ID da planilha do Google Sheets</label>
+        <input type="text" id="unfSpreadsheetId" placeholder="Cole aqui o ID (parte da URL entre /d/ e /edit)">
+      </div>
+      <div class="form-error" id="unidadeFormErro"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelarUnidadeForm">Cancelar</button>
+        <button class="btn-confirm" id="salvarUnidadeForm">Salvar</button>
       </div>
     </div>
   </div>
@@ -775,7 +848,10 @@
    'modalSenha','fecharModalSenha','senhaAtualInput','senhaNovaInput','senhaNovaConfirmInput','senhaErro','cancelarSenha','salvarSenha',
    'modalUsuarios','fecharModalUsuarios','btnNovoUsuario','usuariosTbody',
    'btnAbrirHistoricoGeral','modalHistoricoGeral','fecharModalHistoricoGeral','historicoGeralBusca','historicoGeralLista',
-   'modalUsuarioForm','fecharModalUsuarioForm','usuarioFormTitulo','ufNome','ufUsuario','ufSenha','ufNivel','ufAtivoWrap','ufAtivo','usuarioFormErro','cancelarUsuarioForm','salvarUsuarioForm'
+   'modalUsuarioForm','fecharModalUsuarioForm','usuarioFormTitulo','ufNome','ufUsuario','ufSenha','ufNivel','ufUnidadeWrap','ufUnidade','ufAtivoWrap','ufAtivo','usuarioFormErro','cancelarUsuarioForm','salvarUsuarioForm',
+   'unidadeSeletorWrap','seletorUnidade','unidadeFixaChip','unidadeFixaNome',
+   'btnAbrirUnidades','modalUnidades','fecharModalUnidades','btnNovaUnidade','unidadesTbody',
+   'modalUnidadeForm','fecharModalUnidadeForm','unidadeFormTitulo','unfNome','unfNotaCriacao','unfToggleAvancado','unfSpreadsheetWrap','unfSpreadsheetId','unidadeFormErro','cancelarUnidadeForm','salvarUnidadeForm'
   ].forEach(function (id) { el[id] = document.getElementById(id); });
 
   // Cole aqui a URL do Web App do Apps Script antes de publicar — assim TODOS os
@@ -789,12 +865,15 @@
   var selecionados = new Set();
   var ultimosFiltrados = [];
 
-  var sessao = { token: '', nome: '', usuario: '', nivel: '' };
+  var sessao = { token: '', nome: '', usuario: '', nivel: '', unidadeId: '', unidadeNome: '', unidades: [] };
   if (window.localStorage) {
     sessao.token = localStorage.getItem('pedidos_token') || '';
     sessao.nome = localStorage.getItem('pedidos_nome') || '';
     sessao.usuario = localStorage.getItem('pedidos_usuario') || '';
     sessao.nivel = localStorage.getItem('pedidos_nivel') || '';
+    sessao.unidadeId = localStorage.getItem('pedidos_unidade_id') || '';
+    sessao.unidadeNome = localStorage.getItem('pedidos_unidade_nome') || '';
+    try { sessao.unidades = JSON.parse(localStorage.getItem('pedidos_unidades') || '[]'); } catch (e) { sessao.unidades = []; }
   }
 
   /**
@@ -826,21 +905,50 @@
     sessao.nome = dadosLogin.nome;
     sessao.usuario = dadosLogin.usuario;
     sessao.nivel = dadosLogin.nivel;
+    if (dadosLogin.nivel === 'admin') {
+      sessao.unidades = dadosLogin.unidades || [];
+      // Mantém a unidade que já estava selecionada antes (se ainda existir), senão usa a primeira.
+      var aindaExiste = sessao.unidades.some(function (u) { return u.ID === sessao.unidadeId; });
+      if (!aindaExiste) {
+        sessao.unidadeId = sessao.unidades.length ? sessao.unidades[0].ID : '';
+        sessao.unidadeNome = sessao.unidades.length ? sessao.unidades[0].Nome : '';
+      }
+    } else {
+      sessao.unidadeId = dadosLogin.unidadeId || '';
+      sessao.unidadeNome = dadosLogin.unidadeNome || '';
+      sessao.unidades = [];
+    }
     if (window.localStorage) {
       localStorage.setItem('pedidos_token', sessao.token);
       localStorage.setItem('pedidos_nome', sessao.nome);
       localStorage.setItem('pedidos_usuario', sessao.usuario);
       localStorage.setItem('pedidos_nivel', sessao.nivel);
+      localStorage.setItem('pedidos_unidade_id', sessao.unidadeId);
+      localStorage.setItem('pedidos_unidade_nome', sessao.unidadeNome);
+      localStorage.setItem('pedidos_unidades', JSON.stringify(sessao.unidades));
+    }
+  }
+
+  function selecionarUnidade(unidadeId, unidadeNome) {
+    sessao.unidadeId = unidadeId;
+    sessao.unidadeNome = unidadeNome;
+    if (window.localStorage) {
+      localStorage.setItem('pedidos_unidade_id', unidadeId);
+      localStorage.setItem('pedidos_unidade_nome', unidadeNome);
     }
   }
 
   function encerrarSessaoLocal() {
     sessao.token = ''; sessao.nome = ''; sessao.usuario = ''; sessao.nivel = '';
+    sessao.unidadeId = ''; sessao.unidadeNome = ''; sessao.unidades = [];
     if (window.localStorage) {
       localStorage.removeItem('pedidos_token');
       localStorage.removeItem('pedidos_nome');
       localStorage.removeItem('pedidos_usuario');
       localStorage.removeItem('pedidos_nivel');
+      localStorage.removeItem('pedidos_unidade_id');
+      localStorage.removeItem('pedidos_unidade_nome');
+      localStorage.removeItem('pedidos_unidades');
     }
   }
 
@@ -858,6 +966,17 @@
     el.loginUsuario.focus();
   }
 
+  function popularSeletorUnidade() {
+    el.seletorUnidade.innerHTML = '';
+    sessao.unidades.forEach(function (u) {
+      var opt = document.createElement('option');
+      opt.value = u.ID;
+      opt.textContent = u.Nome;
+      if (u.ID === sessao.unidadeId) opt.selected = true;
+      el.seletorUnidade.appendChild(opt);
+    });
+  }
+
   function mostrarApp() {
     el.loginOverlay.hidden = true;
     document.getElementById('appContent').hidden = false;
@@ -868,7 +987,23 @@
     var ehAdmin = sessao.nivel === 'admin';
     el.btnConfig.hidden = !ehAdmin;
     el.btnAbrirUsuarios.hidden = !ehAdmin;
+    el.btnAbrirUnidades.hidden = !ehAdmin;
     el.btnAbrirHistoricoGeral.hidden = !ehAdmin;
+
+    el.unidadeSeletorWrap.hidden = !ehAdmin;
+    el.unidadeFixaChip.hidden = ehAdmin;
+    if (ehAdmin) {
+      popularSeletorUnidade();
+    } else {
+      el.unidadeFixaNome.textContent = sessao.unidadeNome || '—';
+    }
+
+    if (!sessao.unidadeId) {
+      el.statusLabel.textContent = ehAdmin ? 'Crie uma unidade pra começar' : 'Seu usuário não está vinculado a nenhuma unidade';
+      el.tbody.innerHTML = '';
+      el.emptyState.hidden = false;
+      return;
+    }
     carregar();
   }
 
@@ -960,7 +1095,7 @@
   function fecharModalUsuarios() { el.modalUsuarios.classList.remove('open'); }
 
   function carregarUsuarios() {
-    el.usuariosTbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-faint);">Carregando…</td></tr>';
+    el.usuariosTbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-faint);">Carregando…</td></tr>';
     apiPost({ action: 'listarUsuarios' }).then(function (res) {
       if (!res.ok) { toast(res.error || 'Não foi possível carregar usuários', 'err'); return; }
       renderizarUsuarios(res.usuarios || []);
@@ -980,6 +1115,9 @@
       chipNivel.className = 'nivel-chip ' + (u.Nivel === 'admin' ? 'nivel-admin' : 'nivel-comum');
       chipNivel.textContent = u.Nivel === 'admin' ? 'Admin' : 'Comum';
       tdNivel.appendChild(chipNivel);
+
+      var tdUnidade = document.createElement('td');
+      tdUnidade.textContent = u.Nivel === 'admin' ? 'Todas' : (u.UnidadeNome || '—');
 
       var tdStatus = document.createElement('td');
       var spanStatus = document.createElement('span');
@@ -1015,11 +1153,35 @@
       tr.appendChild(tdNome);
       tr.appendChild(tdUsuario);
       tr.appendChild(tdNivel);
+      tr.appendChild(tdUnidade);
       tr.appendChild(tdStatus);
       tr.appendChild(tdAcoes);
       el.usuariosTbody.appendChild(tr);
     });
   }
+
+  function popularSelectUnidades(select, unidadeSelecionadaId) {
+    select.innerHTML = '';
+    if (!sessao.unidades.length) {
+      var opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'Nenhuma unidade cadastrada';
+      select.appendChild(opt);
+      return;
+    }
+    sessao.unidades.forEach(function (u) {
+      var opt = document.createElement('option');
+      opt.value = u.ID;
+      opt.textContent = u.Nome;
+      if (u.ID === unidadeSelecionadaId) opt.selected = true;
+      select.appendChild(opt);
+    });
+  }
+
+  function atualizarVisibilidadeUnidadeForm() {
+    el.ufUnidadeWrap.hidden = (el.ufNivel.value === 'admin');
+  }
+  el.ufNivel.addEventListener('change', atualizarVisibilidadeUnidadeForm);
 
   function abrirModalUsuarioForm(usuario) {
     editandoUsuarioId = usuario ? usuario.ID : null;
@@ -1029,6 +1191,8 @@
     el.ufSenha.value = '';
     el.ufSenha.placeholder = usuario ? 'Deixe em branco para manter a atual' : 'Mínimo 6 caracteres';
     el.ufNivel.value = usuario ? usuario.Nivel : 'comum';
+    popularSelectUnidades(el.ufUnidade, usuario ? usuario.UnidadeID : (sessao.unidades[0] ? sessao.unidades[0].ID : ''));
+    atualizarVisibilidadeUnidadeForm();
     el.ufAtivoWrap.hidden = !usuario;
     el.ufAtivo.value = usuario && usuario.Ativo === false ? 'false' : 'true';
     el.usuarioFormErro.textContent = '';
@@ -1043,8 +1207,9 @@
     if (!nome || !usuarioLogin) { el.usuarioFormErro.textContent = 'Preencha nome e usuário.'; return; }
     if (!editandoUsuarioId && !senha) { el.usuarioFormErro.textContent = 'Defina uma senha.'; return; }
     if (senha && senha.length < 6) { el.usuarioFormErro.textContent = 'A senha deve ter ao menos 6 caracteres.'; return; }
+    if (el.ufNivel.value === 'comum' && !el.ufUnidade.value) { el.usuarioFormErro.textContent = 'Selecione a unidade do usuário.'; return; }
 
-    var dados = { Nome: nome, Usuario: usuarioLogin, Nivel: el.ufNivel.value };
+    var dados = { Nome: nome, Usuario: usuarioLogin, Nivel: el.ufNivel.value, UnidadeID: el.ufUnidade.value };
     if (senha) dados.Senha = senha;
     if (editandoUsuarioId) dados.Ativo = el.ufAtivo.value === 'true';
 
@@ -1072,6 +1237,129 @@
   el.cancelarUsuarioForm.onclick = fecharModalUsuarioForm;
   el.salvarUsuarioForm.onclick = salvarUsuarioForm;
   [el.modalSenha, el.modalUsuarios, el.modalUsuarioForm].forEach(configurarFechamentoPorFora);
+
+  // -------- Gerenciar unidades (admin) --------
+  var editandoUnidadeId = null;
+
+  function abrirModalUnidades() {
+    el.userDropdown.classList.remove('open');
+    el.modalUnidades.classList.add('open');
+    carregarUnidades();
+  }
+  function fecharModalUnidades() { el.modalUnidades.classList.remove('open'); }
+
+  function carregarUnidades() {
+    el.unidadesTbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-faint);">Carregando…</td></tr>';
+    apiPost({ action: 'listarUnidades' }).then(function (res) {
+      if (!res.ok) { toast(res.error || 'Não foi possível carregar unidades', 'err'); return; }
+      sessao.unidades = (res.unidades || []).map(function (u) { return { ID: u.ID, Nome: u.Nome }; });
+      if (window.localStorage) localStorage.setItem('pedidos_unidades', JSON.stringify(sessao.unidades));
+      popularSeletorUnidade();
+      renderizarUnidades(res.unidades || []);
+    });
+  }
+
+  function renderizarUnidades(unidades) {
+    el.unidadesTbody.innerHTML = '';
+    if (!unidades.length) {
+      el.unidadesTbody.innerHTML = '<tr><td colspan="3"><div class="empty-inline">Nenhuma unidade cadastrada ainda.</div></td></tr>';
+      return;
+    }
+    unidades.forEach(function (u) {
+      var tr = document.createElement('tr');
+      var tdNome = document.createElement('td'); tdNome.textContent = u.Nome;
+      var tdCriada = document.createElement('td'); tdCriada.textContent = u.CriadoEm || '—';
+
+      var tdAcoes = document.createElement('td');
+      var wrap = document.createElement('div');
+      wrap.className = 'usuarios-acoes';
+
+      var btnEdit = document.createElement('button');
+      btnEdit.title = 'Editar';
+      btnEdit.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"></path></svg>';
+      btnEdit.onclick = function () { abrirModalUnidadeForm(u); };
+
+      var btnExcluir = document.createElement('button');
+      btnExcluir.className = 'excluir';
+      btnExcluir.title = 'Excluir';
+      btnExcluir.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+      btnExcluir.onclick = function () {
+        if (!confirm('Excluir a unidade "' + u.Nome + '"? A planilha de pedidos dela NÃO será apagada, só deixa de aparecer aqui.')) return;
+        apiPost({ action: 'excluirUnidade', id: u.ID }).then(function (res) {
+          if (res.ok) { toast('Unidade excluída', 'ok'); carregarUnidades(); }
+          else toast(res.error || 'Não foi possível excluir', 'err');
+        });
+      };
+
+      wrap.appendChild(btnEdit);
+      wrap.appendChild(btnExcluir);
+      tdAcoes.appendChild(wrap);
+
+      tr.appendChild(tdNome);
+      tr.appendChild(tdCriada);
+      tr.appendChild(tdAcoes);
+      el.unidadesTbody.appendChild(tr);
+    });
+  }
+
+  function abrirModalUnidadeForm(unidade) {
+    editandoUnidadeId = unidade ? unidade.ID : null;
+    el.unidadeFormTitulo.textContent = unidade ? 'Editar Unidade' : 'Nova Unidade';
+    el.unfNome.value = unidade ? unidade.Nome : '';
+    el.unfSpreadsheetId.value = '';
+    el.unfSpreadsheetWrap.hidden = true;
+    el.unfNotaCriacao.hidden = !!unidade;
+    el.unfToggleAvancado.textContent = unidade ? 'Trocar a planilha vinculada (avançado)' : 'Usar uma planilha já existente (avançado)';
+    el.unidadeFormErro.textContent = '';
+    el.modalUnidadeForm.classList.add('open');
+  }
+  function fecharModalUnidadeForm() { el.modalUnidadeForm.classList.remove('open'); }
+
+  el.unfToggleAvancado.onclick = function () { el.unfSpreadsheetWrap.hidden = !el.unfSpreadsheetWrap.hidden; };
+
+  function salvarUnidadeForm() {
+    var nome = el.unfNome.value.trim();
+    if (!nome) { el.unidadeFormErro.textContent = 'Informe o nome da unidade.'; return; }
+
+    var dados = { Nome: nome };
+    var spreadsheetId = el.unfSpreadsheetId.value.trim();
+    if (spreadsheetId) dados.SpreadsheetID = spreadsheetId;
+
+    el.salvarUnidadeForm.disabled = true;
+    var acao = editandoUnidadeId
+      ? apiPost({ action: 'atualizarUnidade', id: editandoUnidadeId, dados: dados })
+      : apiPost({ action: 'criarUnidade', dados: dados });
+
+    acao.then(function (res) {
+      el.salvarUnidadeForm.disabled = false;
+      if (res.ok) {
+        fecharModalUnidadeForm();
+        toast(editandoUnidadeId ? 'Unidade atualizada' : 'Unidade criada', 'ok');
+        carregarUnidades();
+        if (!editandoUnidadeId && !sessao.unidadeId) {
+          selecionarUnidade(res.id, nome);
+          popularSeletorUnidade();
+          carregar();
+        }
+      } else {
+        el.unidadeFormErro.textContent = res.error || 'Não foi possível salvar.';
+      }
+    });
+  }
+
+  el.btnAbrirUnidades.onclick = abrirModalUnidades;
+  el.fecharModalUnidades.onclick = fecharModalUnidades;
+  el.btnNovaUnidade.onclick = function () { abrirModalUnidadeForm(null); };
+  el.fecharModalUnidadeForm.onclick = fecharModalUnidadeForm;
+  el.cancelarUnidadeForm.onclick = fecharModalUnidadeForm;
+  el.salvarUnidadeForm.onclick = salvarUnidadeForm;
+  [el.modalUnidades, el.modalUnidadeForm].forEach(configurarFechamentoPorFora);
+
+  el.seletorUnidade.onchange = function () {
+    var opt = el.seletorUnidade.selectedOptions[0];
+    selecionarUnidade(el.seletorUnidade.value, opt ? opt.textContent : '');
+    carregar();
+  };
 
   // -------- Histórico do pedido --------
   function criarItemHistorico(item, comReferencia) {
@@ -1155,7 +1443,7 @@
   // -------- API --------
   function apiGet(paramsExtra) {
     if (!apiUrl) { if (sessao.nivel === 'admin') abrirModalConfig(); return Promise.resolve({ ok: false }); }
-    var params = 'token=' + encodeURIComponent(sessao.token) + (paramsExtra || '');
+    var params = 'token=' + encodeURIComponent(sessao.token) + '&unidadeId=' + encodeURIComponent(sessao.unidadeId) + (paramsExtra || '');
     return fetch(apiUrl + '?' + params, { method: 'GET' })
       .then(function (r) { return r.json(); })
       .then(function (res) { tratarSessaoInvalida(res); return res; })
@@ -1164,7 +1452,7 @@
 
   function apiPost(payload) {
     if (!apiUrl) { if (sessao.nivel === 'admin') abrirModalConfig(); return Promise.resolve({ ok: false }); }
-    payload = Object.assign({ token: sessao.token }, payload);
+    payload = Object.assign({ token: sessao.token, unidadeId: sessao.unidadeId }, payload);
     return fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1546,6 +1834,7 @@
 
   // -------- Modal Pedido --------
   function abrirModalPedido(pedido) {
+    if (!sessao.unidadeId) { toast('Crie uma unidade primeiro (menu do usuário → Gerenciar unidades)', 'err'); return; }
     editandoId = pedido ? pedido.ID : null;
     el.modalTitulo.textContent = pedido ? 'Editar Pedido' : 'Novo Pedido';
     el.salvarPedido.textContent = pedido ? 'Salvar Alterações' : 'Salvar Pedido';
