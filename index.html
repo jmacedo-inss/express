@@ -444,6 +444,13 @@
 }
 #pedidosApp table.unidades td { padding: 0.5em; border-bottom: 1px solid var(--border-soft); vertical-align:middle; }
 #pedidosApp .avancado-toggle { font-size: 0.78em; color: var(--accent); cursor:pointer; font-weight:600; margin: 0.2em 0 0.8em; display:inline-block; }
+#pedidosApp .cor-picker-wrap { display:flex; align-items:center; gap: 0.6em; }
+#pedidosApp .cor-picker-wrap input[type="color"] {
+  width: 2.6em; height: 2.6em; padding: 0.2em; border-radius: 0.55em; border:1px solid var(--border);
+  background: var(--panel-2); cursor:pointer;
+}
+#pedidosApp .cor-picker-wrap span { font-family: var(--font-mono); font-size: 0.82em; color: var(--text-dim); text-transform:uppercase; }
+#pedidosApp .unidade-cor-dot { width: 0.65em; height: 0.65em; border-radius: 50%; flex-shrink:0; display:inline-block; }
 #pedidosApp .empty-inline { padding: 1.5em 0; text-align:center; color: var(--text-faint); font-size: 0.85em; }
 
 /* ---------- Histórico do pedido ---------- */
@@ -785,6 +792,13 @@
       <button class="modal-close" id="fecharModalUnidadeForm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       <h3><span id="unidadeFormTitulo">Nova Unidade</span></h3>
       <div class="field"><label for="unfNome">Nome da unidade</label><input type="text" id="unfNome" placeholder="Ex: Unidade Centro"></div>
+      <div class="field">
+        <label for="unfCor">Cor de identificação</label>
+        <div class="cor-picker-wrap">
+          <input type="color" id="unfCor" value="#2E4B95">
+          <span id="unfCorHex">#2E4B95</span>
+        </div>
+      </div>
       <div class="config-note" id="unfNotaCriacao">O sistema cria automaticamente uma planilha de pedidos nova e já estruturada para essa unidade.</div>
       <span class="avancado-toggle" id="unfToggleAvancado">Usar uma planilha já existente (avançado)</span>
       <div class="field" id="unfSpreadsheetWrap" hidden>
@@ -859,7 +873,7 @@
    'modalUsuarioForm','fecharModalUsuarioForm','usuarioFormTitulo','ufNome','ufUsuario','ufSenha','ufNivel','ufUnidadeWrap','ufUnidade','ufAtivoWrap','ufAtivo','usuarioFormErro','cancelarUsuarioForm','salvarUsuarioForm',
    'unidadeSeletorWrap','seletorUnidade','unidadeFixaChip','unidadeFixaNome',
    'btnAbrirUnidades','modalUnidades','fecharModalUnidades','btnNovaUnidade','unidadesTbody',
-   'modalUnidadeForm','fecharModalUnidadeForm','unidadeFormTitulo','unfNome','unfNotaCriacao','unfToggleAvancado','unfSpreadsheetWrap','unfSpreadsheetId','unidadeFormErro','cancelarUnidadeForm','salvarUnidadeForm'
+   'modalUnidadeForm','fecharModalUnidadeForm','unidadeFormTitulo','unfNome','unfCor','unfCorHex','unfNotaCriacao','unfToggleAvancado','unfSpreadsheetWrap','unfSpreadsheetId','unidadeFormErro','cancelarUnidadeForm','salvarUnidadeForm'
   ].forEach(function (id) { el[id] = document.getElementById(id); });
 
   // Cole aqui a URL do Web App do Apps Script antes de publicar — assim TODOS os
@@ -974,6 +988,27 @@
     el.loginUsuario.focus();
   }
 
+  function hexParaRgb(hex) {
+    hex = String(hex || '').replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(function (c) { return c + c; }).join('');
+    if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+    var num = parseInt(hex, 16);
+    return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+  }
+
+  function aplicarCorSeletorUnidade() {
+    var atual = sessao.unidades.find(function (u) { return u.ID === sessao.unidadeId; });
+    var cor = atual ? atual.Cor : '';
+    var rgb = hexParaRgb(cor);
+    if (rgb) {
+      el.seletorUnidade.style.background = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.14)';
+      el.seletorUnidade.style.borderColor = cor;
+    } else {
+      el.seletorUnidade.style.background = '';
+      el.seletorUnidade.style.borderColor = '';
+    }
+  }
+
   function popularSeletorUnidade() {
     el.seletorUnidade.innerHTML = '';
     sessao.unidades.forEach(function (u) {
@@ -983,6 +1018,7 @@
       if (u.ID === sessao.unidadeId) opt.selected = true;
       el.seletorUnidade.appendChild(opt);
     });
+    aplicarCorSeletorUnidade();
   }
 
   function mostrarApp() {
@@ -1266,7 +1302,7 @@
     el.unidadesTbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-faint);">Carregando…</td></tr>';
     apiPost({ action: 'listarUnidades' }).then(function (res) {
       if (!res.ok) { toast(res.error || 'Não foi possível carregar unidades', 'err'); return; }
-      sessao.unidades = (res.unidades || []).map(function (u) { return { ID: u.ID, Nome: u.Nome }; });
+      sessao.unidades = (res.unidades || []).map(function (u) { return { ID: u.ID, Nome: u.Nome, Cor: u.Cor || '' }; });
       if (window.localStorage) localStorage.setItem('pedidos_unidades', JSON.stringify(sessao.unidades));
       popularSeletorUnidade();
       renderizarUnidades(res.unidades || []);
@@ -1281,7 +1317,15 @@
     }
     unidades.forEach(function (u) {
       var tr = document.createElement('tr');
-      var tdNome = document.createElement('td'); tdNome.textContent = u.Nome;
+      var tdNome = document.createElement('td');
+      if (u.Cor) {
+        var dot = document.createElement('span');
+        dot.className = 'unidade-cor-dot';
+        dot.style.background = u.Cor;
+        dot.style.marginRight = '0.5em';
+        tdNome.appendChild(dot);
+      }
+      tdNome.appendChild(document.createTextNode(u.Nome));
       var tdCriada = document.createElement('td'); tdCriada.textContent = u.CriadoEm || '—';
 
       var tdAcoes = document.createElement('td');
@@ -1316,10 +1360,15 @@
     });
   }
 
+  var PALETA_CORES_UNIDADE = ['#2E4B95', '#0EA37E', '#C97A0B', '#E23B4C', '#7C3AED', '#0E7490', '#B45309', '#4D7C0F'];
+
   function abrirModalUnidadeForm(unidade) {
     editandoUnidadeId = unidade ? unidade.ID : null;
     el.unidadeFormTitulo.textContent = unidade ? 'Editar Unidade' : 'Nova Unidade';
     el.unfNome.value = unidade ? unidade.Nome : '';
+    var corInicial = (unidade && unidade.Cor) || PALETA_CORES_UNIDADE[sessao.unidades.length % PALETA_CORES_UNIDADE.length];
+    el.unfCor.value = corInicial;
+    el.unfCorHex.textContent = corInicial.toUpperCase();
     el.unfSpreadsheetId.value = '';
     el.unfSpreadsheetWrap.hidden = true;
     el.unfNotaCriacao.hidden = !!unidade;
@@ -1330,12 +1379,13 @@
   function fecharModalUnidadeForm() { el.modalUnidadeForm.classList.remove('open'); }
 
   el.unfToggleAvancado.onclick = function () { el.unfSpreadsheetWrap.hidden = !el.unfSpreadsheetWrap.hidden; };
+  el.unfCor.addEventListener('input', function () { el.unfCorHex.textContent = el.unfCor.value.toUpperCase(); });
 
   function salvarUnidadeForm() {
     var nome = el.unfNome.value.trim();
     if (!nome) { el.unidadeFormErro.textContent = 'Informe o nome da unidade.'; return; }
 
-    var dados = { Nome: nome };
+    var dados = { Nome: nome, Cor: el.unfCor.value };
     var spreadsheetId = el.unfSpreadsheetId.value.trim();
     if (spreadsheetId) dados.SpreadsheetID = spreadsheetId;
 
@@ -1372,6 +1422,7 @@
   el.seletorUnidade.onchange = function () {
     var opt = el.seletorUnidade.selectedOptions[0];
     selecionarUnidade(el.seletorUnidade.value, opt ? opt.textContent : '');
+    aplicarCorSeletorUnidade();
     carregar();
   };
 
