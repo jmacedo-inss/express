@@ -626,7 +626,7 @@
             <option value="OW">OW</option>
           </select>
         </div>
-        <div class="field"><label for="fPedido">Nº do Pedido</label><input type="text" id="fPedido" placeholder="Ex: PD-10234"></div>
+        <div class="field" id="fPedidoWrap"><label for="fPedido">Nº do Pedido</label><input type="text" id="fPedido" placeholder="Ex: PD-10234"></div>
       </div>
       <div class="field-grid-2">
         <div class="field">
@@ -837,7 +837,7 @@
    'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir',
    'modalPedido','fecharModalPedido','modalTitulo','fData','fNome','fWhatsapp','fTipo','tipoIcone','fSku',
    'pecasTagWrap','pecasChips','fPecasInput',
-   'fGarantia','fPedido','fStatus','fPagamento',
+   'fGarantia','fPedido','fPedidoWrap','fStatus','fPagamento',
    'fComprovante','comprovanteNomeArquivo','comprovanteAtualWrap','comprovanteAtualLink',
    'historicoBox','historicoLista',
    'formErro','cancelarPedido','salvarPedido',
@@ -1850,6 +1850,7 @@
     el.fGarantia.value = pedido ? pedido['Garantia'] || 'LP' : 'LP';
     atualizarClasseGarantia();
     el.fPedido.value = pedido ? pedido['Pedido'] || '' : '';
+    el.fPedidoWrap.hidden = (!pedido && sessao.nivel !== 'admin');
     el.fStatus.value = pedido ? pedido['Status'] || 'Pendente' : 'Pendente';
     el.fPagamento.value = pedido ? pedido['Pagamento'] || '---' : '---';
     el.fComprovante.value = '';
