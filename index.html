@@ -147,7 +147,7 @@
   box-shadow: var(--shadow); overflow: hidden;
 }
 #pedidosApp .table-scroll { overflow-x: auto; }
-#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 85em; }
+#pedidosApp table.pedidos { width:100%; border-collapse: collapse; font-size: 0.85em; min-width: 92em; }
 #pedidosApp th.check-col, #pedidosApp td.check-col { width: 2.6em; text-align:center; padding-left: 0.6em; padding-right: 0.6em; }
 #pedidosApp input[type="checkbox"].row-check, #pedidosApp input[type="checkbox"]#checkTodos {
   width: 1.05em; height: 1.05em; cursor:pointer; accent-color: var(--accent); vertical-align:middle;
@@ -226,6 +226,18 @@
 }
 #pedidosApp .comprovante-link:hover { border-color: var(--accent); color: var(--accent); }
 #pedidosApp .comprovante-link svg { width: 1.05em; height: 1.05em; }
+
+/* ---------- Nome (sempre maiúsculo) ---------- */
+#pedidosApp #fNome { text-transform: uppercase; }
+#pedidosApp td.nome-cell { text-transform: uppercase; }
+
+/* ---------- WhatsApp ---------- */
+#pedidosApp .whatsapp-link {
+  display:inline-flex; align-items:center; gap: 0.4em; color: var(--good); font-weight:600;
+  text-decoration:none; white-space:nowrap; font-family: var(--font-mono); font-size: 0.95em;
+}
+#pedidosApp .whatsapp-link:hover { text-decoration: underline; }
+#pedidosApp .whatsapp-link svg { width: 1.05em; height: 1.05em; flex-shrink:0; }
 
 /* ---------- Tipo de produto (ícone + seletor) ---------- */
 #pedidosApp .select-with-icon {
@@ -356,7 +368,7 @@
     </section>
 
     <section class="toolbar">
-      <input type="search" id="filtroBusca" placeholder="Buscar por cliente, pedido, modelo/SKU…">
+      <input type="search" id="filtroBusca" placeholder="Buscar por nome, WhatsApp, pedido, modelo/SKU…">
       <select id="filtroTipo">
         <option value="">Todos os tipos</option>
         <option value="Celular">Celular</option>
@@ -395,7 +407,8 @@
             <tr>
               <th class="check-col"><input type="checkbox" id="checkTodos" title="Selecionar todos"></th>
               <th>Data</th>
-              <th>Cód. Cliente</th>
+              <th>Nome</th>
+              <th>WhatsApp</th>
               <th>Tipo de produto</th>
               <th>Modelo/SKU</th>
               <th>Peças</th>
@@ -426,9 +439,10 @@
 
       <div class="field-grid-2">
         <div class="field"><label for="fData">Data</label><input type="datetime-local" id="fData"></div>
-        <div class="field"><label for="fCliente">Cód. Cliente</label><input type="text" id="fCliente" placeholder="Ex: CL-0234"></div>
+        <div class="field"><label for="fNome">Nome</label><input type="text" id="fNome" placeholder="Ex: MARIA SILVA"></div>
       </div>
       <div class="field-grid-2">
+        <div class="field"><label for="fWhatsapp">WhatsApp</label><input type="text" id="fWhatsapp" inputmode="numeric" placeholder="(00) 00000-0000"></div>
         <div class="field">
           <label for="fTipo">Tipo de produto</label>
           <div class="select-with-icon">
@@ -441,7 +455,10 @@
             </select>
           </div>
         </div>
-        <div class="field"><label for="fSku">Modelo/SKU</label><input type="text" id="fSku" placeholder="Ex: SM-X710"></div>
+      </div>
+      <div class="field">
+        <label for="fSku">Modelo/SKU</label>
+        <input type="text" id="fSku" placeholder="Ex: SM-X710">
       </div>
       <div class="field">
         <label for="fPecasInput">Peças</label>
@@ -551,7 +568,7 @@
   ['statusLabel','btnRefresh','btnConfig','statTotal','statPendente','statAndamento','statEntregue',
    'filtroBusca','filtroTipo','filtroStatus','filtroPagamento','btnLimparFiltros','btnNovo','tbody','emptyState',
    'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir',
-   'modalPedido','fecharModalPedido','modalTitulo','fData','fCliente','fTipo','tipoIcone','fSku',
+   'modalPedido','fecharModalPedido','modalTitulo','fData','fNome','fWhatsapp','fTipo','tipoIcone','fSku',
    'pecasTagWrap','pecasChips','fPecasInput',
    'fGarantia','fPedido','fStatus','fPagamento',
    'fComprovante','comprovanteNomeArquivo','comprovanteAtualWrap','comprovanteAtualLink',
@@ -624,7 +641,7 @@
       if (fStatus && p['Status'] !== fStatus) return false;
       if (fPag && p['Pagamento'] !== fPag) return false;
       if (busca) {
-        var alvo = [p['Cód. Cliente'], p['Pedido'], p['Modelo/SKU'], p['Peças']].join(' ').toLowerCase();
+        var alvo = [p['Nome'], p['WhatsApp'], p['Pedido'], p['Modelo/SKU'], p['Peças']].join(' ').toLowerCase();
         if (alvo.indexOf(busca) === -1) return false;
       }
       return true;
@@ -650,7 +667,8 @@
 
       tr.appendChild(criarTdCheckbox(p));
       tr.appendChild(criarTd(p['Data'] || '—', 'mono'));
-      tr.appendChild(criarTd(p['Cód. Cliente'] || '—'));
+      tr.appendChild(criarTd(p['Nome'] ? String(p['Nome']).toUpperCase() : '—', null, 'nome-cell'));
+      tr.appendChild(criarTdWhatsapp(p['WhatsApp']));
       tr.appendChild(criarTdTipo(p['Tipo de Produto']));
       tr.appendChild(criarTd(p['Modelo/SKU'] || '—', 'mono'));
       tr.appendChild(criarTdPecas(p['Peças']));
@@ -744,6 +762,22 @@
       wrap.appendChild(chip);
     });
     td.appendChild(wrap);
+    return td;
+  }
+
+  function criarTdWhatsapp(valor) {
+    var td = document.createElement('td');
+    var texto = formatarWhatsapp(valor);
+    if (!texto) { td.textContent = '—'; return td; }
+    var digitos = String(valor || '').replace(/\D/g, '');
+    var link = document.createElement('a');
+    link.className = 'whatsapp-link';
+    link.href = 'https://wa.me/55' + digitos;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.title = 'Conversar no WhatsApp';
+    link.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.29-.15-1.7-.84-1.96-.93-.26-.1-.46-.15-.65.15-.2.29-.75.93-.92 1.12-.17.2-.34.22-.63.07-.29-.15-1.23-.45-2.34-1.44-.87-.77-1.45-1.72-1.62-2.01-.17-.29-.02-.45.13-.6.13-.13.29-.34.44-.51.15-.17.2-.29.29-.49.1-.2.05-.37-.02-.51-.07-.15-.65-1.56-.89-2.14-.23-.56-.47-.48-.65-.49-.17-.01-.36-.01-.56-.01-.2 0-.51.07-.78.37-.26.29-1.02 1-1.02 2.43 0 1.43 1.05 2.82 1.19 3.01.15.2 2.06 3.15 5 4.42.7.3 1.24.48 1.67.61.7.22 1.34.19 1.84.12.56-.08 1.7-.7 1.94-1.37.24-.68.24-1.26.17-1.38-.07-.12-.26-.2-.55-.34z"></path><path d="M12 2C6.48 2 2 6.48 2 12c0 1.98.58 3.83 1.58 5.39L2 22l4.75-1.53C8.24 21.43 10.06 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18.15c-1.73 0-3.34-.51-4.7-1.38l-.34-.2-3.12 1 1.02-3.04-.22-.35A8.15 8.15 0 0 1 3.85 12c0-4.5 3.66-8.15 8.15-8.15 4.5 0 8.15 3.66 8.15 8.15 0 4.5-3.66 8.15-8.15 8.15z"></path></svg>' + texto;
+    td.appendChild(link);
     return td;
   }
 
@@ -915,13 +949,36 @@
   }
   el.fGarantia.addEventListener('change', atualizarClasseGarantia);
 
+  // -------- Nome (sempre maiúsculo) e WhatsApp (máscara) --------
+  el.fNome.addEventListener('input', function () {
+    var pos = el.fNome.selectionStart;
+    el.fNome.value = el.fNome.value.toUpperCase();
+    try { el.fNome.setSelectionRange(pos, pos); } catch (e) {}
+  });
+
+  function formatarWhatsapp(valor) {
+    var digitos = String(valor || '').replace(/\D/g, '').slice(0, 11);
+    var ddd = digitos.slice(0, 2);
+    var parte1 = digitos.slice(2, 7);
+    var parte2 = digitos.slice(7, 11);
+    var resultado = '';
+    if (ddd) resultado += '(' + ddd + (ddd.length === 2 ? ') ' : '');
+    if (parte1) resultado += parte1;
+    if (parte2) resultado += '-' + parte2;
+    return resultado;
+  }
+  el.fWhatsapp.addEventListener('input', function () {
+    el.fWhatsapp.value = formatarWhatsapp(el.fWhatsapp.value);
+  });
+
   // -------- Modal Pedido --------
   function abrirModalPedido(pedido) {
     editandoId = pedido ? pedido.ID : null;
     el.modalTitulo.textContent = pedido ? 'Editar Pedido' : 'Novo Pedido';
     el.salvarPedido.textContent = pedido ? 'Salvar Alterações' : 'Salvar Pedido';
     el.fData.value = pedido ? converterParaInputDateTime(pedido['Data']) : dataHoraLocalAgora();
-    el.fCliente.value = pedido ? pedido['Cód. Cliente'] || '' : '';
+    el.fNome.value = pedido ? String(pedido['Nome'] || '').toUpperCase() : '';
+    el.fWhatsapp.value = pedido ? formatarWhatsapp(pedido['WhatsApp']) : '';
     el.fTipo.value = pedido ? pedido['Tipo de Produto'] || 'Celular' : 'Celular';
     atualizarIconeTipo();
     el.fSku.value = pedido ? pedido['Modelo/SKU'] || '' : '';
@@ -978,8 +1035,8 @@
   }
 
   function salvarPedidoModal() {
-    if (!el.fCliente.value.trim()) {
-      el.formErro.textContent = 'Preencha ao menos o Cód. Cliente.';
+    if (!el.fNome.value.trim()) {
+      el.formErro.textContent = 'Preencha ao menos o Nome.';
       return;
     }
     var arquivo = el.fComprovante.files[0];
@@ -990,7 +1047,8 @@
 
     var dados = {
       'Data': el.fData.value,
-      'Cód. Cliente': el.fCliente.value.trim(),
+      'Nome': el.fNome.value.trim().toUpperCase(),
+      'WhatsApp': el.fWhatsapp.value.trim(),
       'Tipo de Produto': el.fTipo.value,
       'Modelo/SKU': el.fSku.value.trim(),
       'Peças': (function () {
