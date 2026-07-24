@@ -1924,12 +1924,12 @@
     { nome: 'MIL_Qty',      largura: null,  numFmt: '#,##0.0',  headerAlign: 'center', dataAlign: 'center' },
     { nome: 'ROP_Qty',      largura: null,  numFmt: '#,##0.0',  headerAlign: 'center', dataAlign: 'center' },
     { nome: 'Sugest.Adic',  largura: 14.78, numFmt: 'General',  headerAlign: 'center', dataAlign: 'center', cor: 'FFFFFF00' },
-    { nome: 'Qtd Aceita',   largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center', cor: 'FFC6E0B4' },
+    { nome: 'Qtd Aceita',   largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center', cor: 'FFA9D18E' },
     { nome: 'Remarks',      largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center' },
     { nome: 'Categoria',    largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center' }
   ];
   var COLUNAS_OFS = DEFINICAO_COLUNAS_OFS.map(function (d) { return d.nome; });
-  var COR_FUNDO_PADRAO_OFS = 'FFD9D9D9';
+  var COR_FUNDO_PADRAO_OFS = 'FFDBDBDB';
   var BORDA_FINA_OFS = { style: 'thin', color: { argb: 'FF000000' } };
   var MAPA_CATEGORIA_OFS = { 'Celular': 'H.H.P', 'Tablet': 'TAB', 'Relógio': 'WATCH', 'Fones': 'AUDIO' };
 
@@ -2044,6 +2044,16 @@
     return obj;
   }
 
+  function letraColuna(indice1based) {
+    var letra = '';
+    while (indice1based > 0) {
+      var resto = (indice1based - 1) % 26;
+      letra = String.fromCharCode(65 + resto) + letra;
+      indice1based = Math.floor((indice1based - 1) / 26);
+    }
+    return letra;
+  }
+
   function gerarArquivoExcelOfs(linhas) {
     if (typeof ExcelJS === 'undefined') {
       toast('Biblioteca de Excel não carregou. Verifique sua conexão e recarregue a página.', 'err');
@@ -2063,6 +2073,9 @@
       cell.protection = { locked: true };
     });
 
+    var idxColSugestao = DEFINICAO_COLUNAS_OFS.findIndex(function (d) { return d.nome === 'Sugest.Adic'; });
+    var letraColSugestao = letraColuna(idxColSugestao + 1);
+
     linhas.forEach(function (linha) {
       var valores = COLUNAS_OFS.map(function (c) { return linha[c] !== undefined ? linha[c] : ''; });
       var row = ws.addRow(valores);
@@ -2074,6 +2087,18 @@
         cell.alignment = construirAlinhamento(def.dataAlign, null);
         cell.numFmt = def.numFmt;
         cell.protection = { locked: def.nome !== 'Qtd Aceita' };
+        if (def.nome === 'Qtd Aceita') {
+          // Mesma trava do arquivo original: só aceita número inteiro entre 0
+          // e o valor de Sugest.Adic da mesma linha — não deixa digitar mais
+          // do que foi sugerido.
+          cell.dataValidation = {
+            type: 'whole',
+            operator: 'between',
+            allowBlank: true,
+            showErrorMessage: true,
+            formulae: [0, letraColSugestao + row.number]
+          };
+        }
       });
     });
 
