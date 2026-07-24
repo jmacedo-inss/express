@@ -836,11 +836,8 @@
         <label for="unfSpreadsheetId">ID da planilha do Google Sheets</label>
         <input type="text" id="unfSpreadsheetId" placeholder="Cole aqui o ID (parte da URL entre /d/ e /edit)">
       </div>
-      <div class="field-grid-2">
-        <div class="field"><label for="unfCodigoAsc">Código ASC</label><input type="text" id="unfCodigoAsc" placeholder="Ex: 4180016"></div>
-        <div class="field"><label for="unfSenhaOfs">Senha da planilha OFS (opcional)</label><input type="text" id="unfSenhaOfs" placeholder="Anotação de referência"></div>
-      </div>
-      <div class="config-note">O Código ASC é usado ao gerar a planilha de pedido adicional (OFS) pra Samsung. A senha da planilha protegida gerada é sempre a mesma do arquivo de referência da Samsung (não depende do que for preenchido aqui — este campo é só uma anotação, caso queira guardar a senha real em algum lugar).</div>
+      <div class="field"><label for="unfCodigoAsc">Código ASC</label><input type="text" id="unfCodigoAsc" placeholder="Ex: 4180016"></div>
+      <div class="config-note">O Código ASC é usado ao gerar a planilha de pedido adicional (OFS) pra Samsung.</div>
       <div class="form-error" id="unidadeFormErro"></div>
       <div class="modal-actions">
         <button class="btn-ghost" id="cancelarUnidadeForm">Cancelar</button>
@@ -909,7 +906,7 @@
    'modalUsuarioForm','fecharModalUsuarioForm','usuarioFormTitulo','ufNome','ufUsuario','ufSenha','ufNivel','ufUnidadeWrap','ufUnidade','ufAtivoWrap','ufAtivo','usuarioFormErro','cancelarUsuarioForm','salvarUsuarioForm',
    'unidadeSeletorWrap','seletorUnidade','unidadeFixaChip','unidadeFixaNome',
    'btnAbrirUnidades','modalUnidades','fecharModalUnidades','btnNovaUnidade','unidadesTbody',
-   'modalUnidadeForm','fecharModalUnidadeForm','unidadeFormTitulo','unfNome','unfCor','unfCorHex','unfNotaCriacao','unfToggleAvancado','unfSpreadsheetWrap','unfSpreadsheetId','unfCodigoAsc','unfSenhaOfs','unidadeFormErro','cancelarUnidadeForm','salvarUnidadeForm'
+   'modalUnidadeForm','fecharModalUnidadeForm','unidadeFormTitulo','unfNome','unfCor','unfCorHex','unfNotaCriacao','unfToggleAvancado','unfSpreadsheetWrap','unfSpreadsheetId','unfCodigoAsc','unidadeFormErro','cancelarUnidadeForm','salvarUnidadeForm'
   ].forEach(function (id) { el[id] = document.getElementById(id); });
 
   // Cole aqui a URL do Web App do Apps Script antes de publicar — assim TODOS os
@@ -923,7 +920,7 @@
   var selecionados = new Set();
   var ultimosFiltrados = [];
 
-  var sessao = { token: '', nome: '', usuario: '', nivel: '', unidadeId: '', unidadeNome: '', unidades: [], codigoAsc: '', senhaOfs: '' };
+  var sessao = { token: '', nome: '', usuario: '', nivel: '', unidadeId: '', unidadeNome: '', unidades: [], codigoAsc: '' };
   if (window.localStorage) {
     sessao.token = localStorage.getItem('pedidos_token') || '';
     sessao.nome = localStorage.getItem('pedidos_nome') || '';
@@ -932,7 +929,6 @@
     sessao.unidadeId = localStorage.getItem('pedidos_unidade_id') || '';
     sessao.unidadeNome = localStorage.getItem('pedidos_unidade_nome') || '';
     sessao.codigoAsc = localStorage.getItem('pedidos_codigo_asc') || '';
-    sessao.senhaOfs = localStorage.getItem('pedidos_senha_ofs') || '';
     try { sessao.unidades = JSON.parse(localStorage.getItem('pedidos_unidades') || '[]'); } catch (e) { sessao.unidades = []; }
   }
 
@@ -974,13 +970,11 @@
         sessao.unidadeNome = sessao.unidades.length ? sessao.unidades[0].Nome : '';
       }
       sessao.codigoAsc = '';
-      sessao.senhaOfs = '';
     } else {
       sessao.unidadeId = dadosLogin.unidadeId || '';
       sessao.unidadeNome = dadosLogin.unidadeNome || '';
       sessao.unidades = [];
       sessao.codigoAsc = dadosLogin.codigoAsc || '';
-      sessao.senhaOfs = dadosLogin.senhaOfs || '';
     }
     if (window.localStorage) {
       localStorage.setItem('pedidos_token', sessao.token);
@@ -991,7 +985,6 @@
       localStorage.setItem('pedidos_unidade_nome', sessao.unidadeNome);
       localStorage.setItem('pedidos_unidades', JSON.stringify(sessao.unidades));
       localStorage.setItem('pedidos_codigo_asc', sessao.codigoAsc);
-      localStorage.setItem('pedidos_senha_ofs', sessao.senhaOfs);
     }
   }
 
@@ -1007,7 +1000,7 @@
   function encerrarSessaoLocal() {
     sessao.token = ''; sessao.nome = ''; sessao.usuario = ''; sessao.nivel = '';
     sessao.unidadeId = ''; sessao.unidadeNome = ''; sessao.unidades = [];
-    sessao.codigoAsc = ''; sessao.senhaOfs = '';
+    sessao.codigoAsc = '';
     if (window.localStorage) {
       localStorage.removeItem('pedidos_token');
       localStorage.removeItem('pedidos_nome');
@@ -1351,7 +1344,7 @@
     el.unidadesTbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-faint);">Carregando…</td></tr>';
     apiPost({ action: 'listarUnidades' }).then(function (res) {
       if (!res.ok) { toast(res.error || 'Não foi possível carregar unidades', 'err'); return; }
-      sessao.unidades = (res.unidades || []).map(function (u) { return { ID: u.ID, Nome: u.Nome, Cor: u.Cor || '', CodigoASC: u.CodigoASC || '', SenhaOFS: u.SenhaOFS || '' }; });
+      sessao.unidades = (res.unidades || []).map(function (u) { return { ID: u.ID, Nome: u.Nome, Cor: u.Cor || '', CodigoASC: u.CodigoASC || '' }; });
       if (window.localStorage) localStorage.setItem('pedidos_unidades', JSON.stringify(sessao.unidades));
       popularSeletorUnidade();
       renderizarUnidades(res.unidades || []);
@@ -1423,7 +1416,6 @@
     el.unfNotaCriacao.hidden = !!unidade;
     el.unfToggleAvancado.textContent = unidade ? 'Trocar a planilha vinculada (avançado)' : 'Usar uma planilha já existente (avançado)';
     el.unfCodigoAsc.value = unidade ? (unidade.CodigoASC || '') : '';
-    el.unfSenhaOfs.value = unidade ? (unidade.SenhaOFS || '') : '';
     el.unidadeFormErro.textContent = '';
     el.modalUnidadeForm.classList.add('open');
   }
@@ -1436,7 +1428,7 @@
     var nome = el.unfNome.value.trim();
     if (!nome) { el.unidadeFormErro.textContent = 'Informe o nome da unidade.'; return; }
 
-    var dados = { Nome: nome, Cor: el.unfCor.value, CodigoASC: el.unfCodigoAsc.value.trim(), SenhaOFS: el.unfSenhaOfs.value };
+    var dados = { Nome: nome, Cor: el.unfCor.value, CodigoASC: el.unfCodigoAsc.value.trim() };
     var spreadsheetId = el.unfSpreadsheetId.value.trim();
     if (spreadsheetId) dados.SpreadsheetID = spreadsheetId;
 
@@ -1932,9 +1924,9 @@
   function obterConfigUnidadeAtual() {
     if (sessao.nivel === 'admin') {
       var u = sessao.unidades.find(function (x) { return x.ID === sessao.unidadeId; });
-      return { codigoAsc: u ? u.CodigoASC : '', senhaOfs: u ? u.SenhaOFS : '' };
+      return { codigoAsc: u ? u.CodigoASC : '' };
     }
-    return { codigoAsc: sessao.codigoAsc || '', senhaOfs: sessao.senhaOfs || '' };
+    return { codigoAsc: sessao.codigoAsc || '' };
   }
 
   function extrairAnoMes(dataTexto) {
