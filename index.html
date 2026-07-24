@@ -199,14 +199,14 @@
 #pedidosApp .pecas-chips { display:flex; flex-wrap:wrap; gap: 0.25em; }
 #pedidosApp .pecas-chip-mini {
   display:inline-flex; align-items:center; gap: 0.3em; background: var(--panel-3); border:1px solid var(--border);
-  color: var(--text-dim); border-radius: 0.4em; padding: 0.1em 0.35em 0.1em 0.42em; font-size: 0.7em; font-weight:600; white-space:nowrap;
+  color: var(--text-dim); border-radius: 0.4em; padding: 0.1em 0.42em 0.1em 0.35em; font-size: 0.7em; font-weight:600; white-space:nowrap;
 }
 #pedidosApp .pecas-chip-mini .pecas-copiar {
   display:inline-flex; align-items:center; justify-content:center; background:none; border:none; padding:0;
   cursor:pointer; color: var(--text-faint); flex-shrink:0; border-radius: 0.25em; transition: color .15s ease, background-color .15s ease;
 }
 #pedidosApp .pecas-chip-mini .pecas-copiar:hover { color: var(--accent); background: var(--panel-2); }
-#pedidosApp .pecas-chip-mini .pecas-copiar svg { width: 0.85em; height: 0.85em; display:block; }
+#pedidosApp .pecas-chip-mini .pecas-copiar svg { width: 0.68em; height: 0.68em; display:block; }
 #pedidosApp .pecas-chip-mini .pecas-copiar.copiado { color: var(--good); }
 #pedidosApp table.pedidos tbody td.criado-por-cell { font-size: 0.78em; }
 #pedidosApp .data-wrap { display:flex; align-items:center; gap: 0.4em; white-space:nowrap; }
@@ -1812,8 +1812,8 @@
         e.stopPropagation();
         copiarTexto(item, btnCopiar);
       };
-      chip.appendChild(texto);
       chip.appendChild(btnCopiar);
+      chip.appendChild(texto);
       wrap.appendChild(chip);
     });
     td.appendChild(wrap);
