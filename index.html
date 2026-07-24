@@ -198,9 +198,16 @@
 #pedidosApp table.pedidos tbody td.pecas-cell { max-width: 18em; white-space: normal; color: var(--text-dim); }
 #pedidosApp .pecas-chips { display:flex; flex-wrap:wrap; gap: 0.25em; }
 #pedidosApp .pecas-chip-mini {
-  display:inline-flex; align-items:center; background: var(--panel-3); border:1px solid var(--border);
-  color: var(--text-dim); border-radius: 0.4em; padding: 0.1em 0.42em; font-size: 0.7em; font-weight:600; white-space:nowrap;
+  display:inline-flex; align-items:center; gap: 0.3em; background: var(--panel-3); border:1px solid var(--border);
+  color: var(--text-dim); border-radius: 0.4em; padding: 0.1em 0.35em 0.1em 0.42em; font-size: 0.7em; font-weight:600; white-space:nowrap;
 }
+#pedidosApp .pecas-chip-mini .pecas-copiar {
+  display:inline-flex; align-items:center; justify-content:center; background:none; border:none; padding:0;
+  cursor:pointer; color: var(--text-faint); flex-shrink:0; border-radius: 0.25em; transition: color .15s ease, background-color .15s ease;
+}
+#pedidosApp .pecas-chip-mini .pecas-copiar:hover { color: var(--accent); background: var(--panel-2); }
+#pedidosApp .pecas-chip-mini .pecas-copiar svg { width: 0.85em; height: 0.85em; display:block; }
+#pedidosApp .pecas-chip-mini .pecas-copiar.copiado { color: var(--good); }
 #pedidosApp table.pedidos tbody td.criado-por-cell { font-size: 0.78em; }
 #pedidosApp .data-wrap { display:flex; align-items:center; gap: 0.4em; white-space:nowrap; }
 #pedidosApp .data-texto { font-family: var(--font-mono); font-size: 0.8em; color: var(--text-dim); }
@@ -1758,6 +1765,32 @@
     return td;
   }
 
+  function copiarTexto(texto, botao) {
+    function marcarCopiado() {
+      var iconeOriginal = botao.innerHTML;
+      botao.classList.add('copiado');
+      botao.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      setTimeout(function () {
+        botao.classList.remove('copiado');
+        botao.innerHTML = iconeOriginal;
+      }, 1200);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(marcarCopiado).catch(function () {
+        toast('Não foi possível copiar', 'err');
+      });
+    } else {
+      var campoTemp = document.createElement('textarea');
+      campoTemp.value = texto;
+      campoTemp.style.position = 'fixed';
+      campoTemp.style.opacity = '0';
+      document.body.appendChild(campoTemp);
+      campoTemp.select();
+      try { document.execCommand('copy'); marcarCopiado(); } catch (e) { toast('Não foi possível copiar', 'err'); }
+      document.body.removeChild(campoTemp);
+    }
+  }
+
   function criarTdPecas(valor) {
     var td = document.createElement('td');
     td.className = 'pecas-cell';
@@ -1768,7 +1801,19 @@
     itens.forEach(function (item) {
       var chip = document.createElement('span');
       chip.className = 'pecas-chip-mini';
-      chip.textContent = item;
+      var texto = document.createElement('span');
+      texto.textContent = item;
+      var btnCopiar = document.createElement('button');
+      btnCopiar.type = 'button';
+      btnCopiar.className = 'pecas-copiar';
+      btnCopiar.title = 'Copiar PN';
+      btnCopiar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+      btnCopiar.onclick = function (e) {
+        e.stopPropagation();
+        copiarTexto(item, btnCopiar);
+      };
+      chip.appendChild(texto);
+      chip.appendChild(btnCopiar);
       wrap.appendChild(chip);
     });
     td.appendChild(wrap);
