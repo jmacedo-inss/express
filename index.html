@@ -497,6 +497,8 @@
 #pedidosApp .historico-item .referencia { font-weight:700; color: var(--accent); font-size: 0.85em; margin-bottom: 0.2em; }
 #pedidosApp .historico-vazio { font-size: 0.8em; color: var(--text-faint); font-style:italic; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -588,6 +590,7 @@
     <section class="bulk-bar fade-toggle fechado" id="bulkBar">
       <span id="bulkCount">0 selecionados</span>
       <button class="btn-clear" id="bulkDesmarcar">Cancelar seleção</button>
+      <button class="btn-clear" id="bulkExportarOfs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>Exportar OFS (Excel)</button>
       <button class="btn-danger-solid" id="bulkExcluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>Excluir selecionados</button>
     </section>
 
@@ -833,6 +836,11 @@
         <label for="unfSpreadsheetId">ID da planilha do Google Sheets</label>
         <input type="text" id="unfSpreadsheetId" placeholder="Cole aqui o ID (parte da URL entre /d/ e /edit)">
       </div>
+      <div class="field-grid-2">
+        <div class="field"><label for="unfCodigoAsc">Código ASC</label><input type="text" id="unfCodigoAsc" placeholder="Ex: 4180016"></div>
+        <div class="field"><label for="unfSenhaOfs">Senha da planilha OFS (opcional)</label><input type="text" id="unfSenhaOfs" placeholder="Anotação de referência"></div>
+      </div>
+      <div class="config-note">O Código ASC é usado ao gerar a planilha de pedido adicional (OFS) pra Samsung. A senha da planilha protegida gerada é sempre a mesma do arquivo de referência da Samsung (não depende do que for preenchido aqui — este campo é só uma anotação, caso queira guardar a senha real em algum lugar).</div>
       <div class="form-error" id="unidadeFormErro"></div>
       <div class="modal-actions">
         <button class="btn-ghost" id="cancelarUnidadeForm">Cancelar</button>
@@ -884,7 +892,7 @@
   var el = {};
   ['statusLabel','btnRefresh','btnConfig','statTotal','statPendente','statAndamento','statEntregue',
    'filtroBusca','filtroTipo','filtroStatus','filtroPagamento','btnLimparFiltros','btnNovo','tbody','emptyState',
-   'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir',
+   'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir','bulkExportarOfs',
    'modalPedido','fecharModalPedido','modalTitulo','fData','fNome','fWhatsapp','fTipo','tipoIcone','fSku',
    'pecasTagWrap','pecasChips','fPecasInput',
    'fGarantia','fPedido','fPedidoWrap','fStatus','fPagamento','fValorPago','fValorPagoWrap',
@@ -901,7 +909,7 @@
    'modalUsuarioForm','fecharModalUsuarioForm','usuarioFormTitulo','ufNome','ufUsuario','ufSenha','ufNivel','ufUnidadeWrap','ufUnidade','ufAtivoWrap','ufAtivo','usuarioFormErro','cancelarUsuarioForm','salvarUsuarioForm',
    'unidadeSeletorWrap','seletorUnidade','unidadeFixaChip','unidadeFixaNome',
    'btnAbrirUnidades','modalUnidades','fecharModalUnidades','btnNovaUnidade','unidadesTbody',
-   'modalUnidadeForm','fecharModalUnidadeForm','unidadeFormTitulo','unfNome','unfCor','unfCorHex','unfNotaCriacao','unfToggleAvancado','unfSpreadsheetWrap','unfSpreadsheetId','unidadeFormErro','cancelarUnidadeForm','salvarUnidadeForm'
+   'modalUnidadeForm','fecharModalUnidadeForm','unidadeFormTitulo','unfNome','unfCor','unfCorHex','unfNotaCriacao','unfToggleAvancado','unfSpreadsheetWrap','unfSpreadsheetId','unfCodigoAsc','unfSenhaOfs','unidadeFormErro','cancelarUnidadeForm','salvarUnidadeForm'
   ].forEach(function (id) { el[id] = document.getElementById(id); });
 
   // Cole aqui a URL do Web App do Apps Script antes de publicar — assim TODOS os
@@ -915,7 +923,7 @@
   var selecionados = new Set();
   var ultimosFiltrados = [];
 
-  var sessao = { token: '', nome: '', usuario: '', nivel: '', unidadeId: '', unidadeNome: '', unidades: [] };
+  var sessao = { token: '', nome: '', usuario: '', nivel: '', unidadeId: '', unidadeNome: '', unidades: [], codigoAsc: '', senhaOfs: '' };
   if (window.localStorage) {
     sessao.token = localStorage.getItem('pedidos_token') || '';
     sessao.nome = localStorage.getItem('pedidos_nome') || '';
@@ -923,6 +931,8 @@
     sessao.nivel = localStorage.getItem('pedidos_nivel') || '';
     sessao.unidadeId = localStorage.getItem('pedidos_unidade_id') || '';
     sessao.unidadeNome = localStorage.getItem('pedidos_unidade_nome') || '';
+    sessao.codigoAsc = localStorage.getItem('pedidos_codigo_asc') || '';
+    sessao.senhaOfs = localStorage.getItem('pedidos_senha_ofs') || '';
     try { sessao.unidades = JSON.parse(localStorage.getItem('pedidos_unidades') || '[]'); } catch (e) { sessao.unidades = []; }
   }
 
@@ -963,10 +973,14 @@
         sessao.unidadeId = sessao.unidades.length ? sessao.unidades[0].ID : '';
         sessao.unidadeNome = sessao.unidades.length ? sessao.unidades[0].Nome : '';
       }
+      sessao.codigoAsc = '';
+      sessao.senhaOfs = '';
     } else {
       sessao.unidadeId = dadosLogin.unidadeId || '';
       sessao.unidadeNome = dadosLogin.unidadeNome || '';
       sessao.unidades = [];
+      sessao.codigoAsc = dadosLogin.codigoAsc || '';
+      sessao.senhaOfs = dadosLogin.senhaOfs || '';
     }
     if (window.localStorage) {
       localStorage.setItem('pedidos_token', sessao.token);
@@ -976,6 +990,8 @@
       localStorage.setItem('pedidos_unidade_id', sessao.unidadeId);
       localStorage.setItem('pedidos_unidade_nome', sessao.unidadeNome);
       localStorage.setItem('pedidos_unidades', JSON.stringify(sessao.unidades));
+      localStorage.setItem('pedidos_codigo_asc', sessao.codigoAsc);
+      localStorage.setItem('pedidos_senha_ofs', sessao.senhaOfs);
     }
   }
 
@@ -991,6 +1007,7 @@
   function encerrarSessaoLocal() {
     sessao.token = ''; sessao.nome = ''; sessao.usuario = ''; sessao.nivel = '';
     sessao.unidadeId = ''; sessao.unidadeNome = ''; sessao.unidades = [];
+    sessao.codigoAsc = ''; sessao.senhaOfs = '';
     if (window.localStorage) {
       localStorage.removeItem('pedidos_token');
       localStorage.removeItem('pedidos_nome');
@@ -999,6 +1016,8 @@
       localStorage.removeItem('pedidos_unidade_id');
       localStorage.removeItem('pedidos_unidade_nome');
       localStorage.removeItem('pedidos_unidades');
+      localStorage.removeItem('pedidos_codigo_asc');
+      localStorage.removeItem('pedidos_senha_ofs');
     }
   }
 
@@ -1332,7 +1351,7 @@
     el.unidadesTbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-faint);">Carregando…</td></tr>';
     apiPost({ action: 'listarUnidades' }).then(function (res) {
       if (!res.ok) { toast(res.error || 'Não foi possível carregar unidades', 'err'); return; }
-      sessao.unidades = (res.unidades || []).map(function (u) { return { ID: u.ID, Nome: u.Nome, Cor: u.Cor || '' }; });
+      sessao.unidades = (res.unidades || []).map(function (u) { return { ID: u.ID, Nome: u.Nome, Cor: u.Cor || '', CodigoASC: u.CodigoASC || '', SenhaOFS: u.SenhaOFS || '' }; });
       if (window.localStorage) localStorage.setItem('pedidos_unidades', JSON.stringify(sessao.unidades));
       popularSeletorUnidade();
       renderizarUnidades(res.unidades || []);
@@ -1403,6 +1422,8 @@
     el.unfSpreadsheetWrap.classList.add('fechado');
     el.unfNotaCriacao.hidden = !!unidade;
     el.unfToggleAvancado.textContent = unidade ? 'Trocar a planilha vinculada (avançado)' : 'Usar uma planilha já existente (avançado)';
+    el.unfCodigoAsc.value = unidade ? (unidade.CodigoASC || '') : '';
+    el.unfSenhaOfs.value = unidade ? (unidade.SenhaOFS || '') : '';
     el.unidadeFormErro.textContent = '';
     el.modalUnidadeForm.classList.add('open');
   }
@@ -1415,7 +1436,7 @@
     var nome = el.unfNome.value.trim();
     if (!nome) { el.unidadeFormErro.textContent = 'Informe o nome da unidade.'; return; }
 
-    var dados = { Nome: nome, Cor: el.unfCor.value };
+    var dados = { Nome: nome, Cor: el.unfCor.value, CodigoASC: el.unfCodigoAsc.value.trim(), SenhaOFS: el.unfSenhaOfs.value };
     var spreadsheetId = el.unfSpreadsheetId.value.trim();
     if (spreadsheetId) dados.SpreadsheetID = spreadsheetId;
 
@@ -1892,6 +1913,199 @@
       } else toast('Não foi possível excluir os pedidos selecionados', 'err');
     });
   }
+
+  // -------- Exportar planilha OFS (Excel) --------
+  var COLUNAS_OFS = ['ASC_CODE', 'PN', 'OFS_Proposal', 'DMD-3', 'DMD-2', 'DMD-1', 'M0_Fcst', 'Stock', 'MIL_days', 'ROP_Days', 'MIL_Qty', 'ROP_Qty', 'Sugest.Adic', 'Qtd Aceita', 'Remarks', 'Categoria'];
+  var MAPA_CATEGORIA_OFS = { 'Celular': 'H.H.P', 'Tablet': 'TAB', 'Relógio': 'WATCH', 'Fones': 'AUDIO' };
+
+  // Hash de proteção extraído de um arquivo real da Samsung (Sheet Protection).
+  // Copiando esses valores exatos, a MESMA senha que já destrava o arquivo original
+  // da Samsung também destrava o arquivo gerado aqui — sem o sistema nunca precisar
+  // saber qual é a senha de verdade.
+  var PROTECAO_OFS = {
+    algorithmName: 'SHA-512',
+    hashValue: 'XRw3/WVcI67v6omaht/UImvcIf2HXhIIDRFB1PEZkDTQm8CfIchEAgz6YybltAdpmlbTP+Ibh4X2aOOMs40bXw==',
+    saltValue: 'LkoWjkaEoYmX9ori8OtRIQ==',
+    spinCount: 100000
+  };
+
+  function obterConfigUnidadeAtual() {
+    if (sessao.nivel === 'admin') {
+      var u = sessao.unidades.find(function (x) { return x.ID === sessao.unidadeId; });
+      return { codigoAsc: u ? u.CodigoASC : '', senhaOfs: u ? u.SenhaOFS : '' };
+    }
+    return { codigoAsc: sessao.codigoAsc || '', senhaOfs: sessao.senhaOfs || '' };
+  }
+
+  function extrairAnoMes(dataTexto) {
+    var m = String(dataTexto || '').match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (!m) return null;
+    return { ano: parseInt(m[3], 10), mes: parseInt(m[2], 10) };
+  }
+
+  function mesRelativo(offset) {
+    var hoje = new Date();
+    var d = new Date(hoje.getFullYear(), hoje.getMonth() + offset, 1);
+    return { ano: d.getFullYear(), mes: d.getMonth() + 1 };
+  }
+
+  function listaPnsDoPedido(pedido) {
+    return String(pedido['Peças'] || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  function contarDemandaMes(pn, anoMes) {
+    var total = 0;
+    pedidos.forEach(function (p) {
+      var am = extrairAnoMes(p['Data']);
+      if (!am || am.ano !== anoMes.ano || am.mes !== anoMes.mes) return;
+      if (listaPnsDoPedido(p).indexOf(pn) !== -1) total++;
+    });
+    return total;
+  }
+
+  function coletarPnsSelecionados() {
+    var quantidades = {};
+    var categoriaPorPn = {};
+    selecionados.forEach(function (id) {
+      var pedido = pedidos.find(function (p) { return p.ID === id; });
+      if (!pedido) return;
+      listaPnsDoPedido(pedido).forEach(function (pn) {
+        quantidades[pn] = (quantidades[pn] || 0) + 1;
+        if (!categoriaPorPn[pn]) categoriaPorPn[pn] = pedido['Tipo de Produto'] || '';
+      });
+    });
+    return { quantidades: quantidades, categoriaPorPn: categoriaPorPn };
+  }
+
+  function calcularQtdSugerida(qtdAceita) {
+    var minimo = qtdAceita + 1;
+    var maximo = Math.max(minimo, 9);
+    return minimo + Math.floor(Math.random() * (maximo - minimo + 1));
+  }
+
+  function montarLinhasOfs(config) {
+    var coleta = coletarPnsSelecionados();
+    var pns = Object.keys(coleta.quantidades);
+    var MIL_DAYS = 12, ROP_DAYS = 6;
+    var mesM1 = mesRelativo(-1), mesM2 = mesRelativo(-2), mesM3 = mesRelativo(-3);
+
+    return pns.map(function (pn) {
+      var dmd3 = contarDemandaMes(pn, mesM3);
+      var dmd2 = contarDemandaMes(pn, mesM2);
+      var dmd1 = contarDemandaMes(pn, mesM1);
+      var m0 = Math.round((0.5 * dmd1 + 0.3 * dmd2 + 0.2 * dmd3) * 10) / 10;
+      var stock = 0;
+      var milQty = Math.round((m0 * MIL_DAYS / 30) * 100) / 100;
+      var ropQty = Math.round((m0 * ROP_DAYS / 30) * 100) / 100;
+      var qtdAceita = coleta.quantidades[pn];
+      var sugestao = calcularQtdSugerida(qtdAceita);
+      var categoriaOriginal = coleta.categoriaPorPn[pn] || '';
+      var categoria = MAPA_CATEGORIA_OFS[categoriaOriginal] || categoriaOriginal;
+      var linha = {};
+      linha['ASC_CODE'] = config.codigoAsc;
+      linha['PN'] = pn;
+      linha['OFS_Proposal'] = sugestao;
+      linha['DMD-3'] = dmd3;
+      linha['DMD-2'] = dmd2;
+      linha['DMD-1'] = dmd1;
+      linha['M0_Fcst'] = m0;
+      linha['Stock'] = stock;
+      linha['MIL_days'] = MIL_DAYS;
+      linha['ROP_Days'] = ROP_DAYS;
+      linha['MIL_Qty'] = milQty;
+      linha['ROP_Qty'] = ropQty;
+      linha['Sugest.Adic'] = sugestao;
+      linha['Qtd Aceita'] = qtdAceita;
+      linha['Remarks'] = '';
+      linha['Categoria'] = categoria;
+      return linha;
+    });
+  }
+
+  function gerarArquivoExcelOfs(linhas) {
+    if (typeof ExcelJS === 'undefined') {
+      toast('Biblioteca de Excel não carregou. Verifique sua conexão e recarregue a página.', 'err');
+      return;
+    }
+    var wb = new ExcelJS.Workbook();
+    var ws = wb.addWorksheet('Sheet1');
+
+    var headerRow = ws.addRow(COLUNAS_OFS);
+    headerRow.eachCell(function (cell) {
+      cell.font = { bold: true };
+      cell.protection = { locked: true };
+    });
+
+    linhas.forEach(function (linha) {
+      var valores = COLUNAS_OFS.map(function (c) { return linha[c] !== undefined ? linha[c] : ''; });
+      var row = ws.addRow(valores);
+      row.eachCell(function (cell, colNumero) {
+        var nomeCol = COLUNAS_OFS[colNumero - 1];
+        cell.protection = { locked: nomeCol !== 'Qtd Aceita' };
+        if (nomeCol === 'Sugest.Adic') {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
+        }
+      });
+    });
+
+    COLUNAS_OFS.forEach(function (nomeCol, i) {
+      ws.getColumn(i + 1).width = Math.max(11, nomeCol.length + 2);
+    });
+
+    wb.xlsx.writeBuffer().then(function (buffer) {
+      return injetarProtecaoReal(buffer);
+    }).then(function (blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      var dataStr = new Date().toISOString().slice(0, 10);
+      a.download = 'OFS_Adicional_' + dataStr + '.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      toast('Planilha OFS gerada', 'ok');
+    }).catch(function (err) {
+      toast('Erro ao gerar a planilha: ' + err.message, 'err');
+    });
+  }
+
+  /**
+   * Substitui a proteção "genérica" que o ExcelJS geraria por um bloco
+   * <sheetProtection> copiado byte a byte de um arquivo real da Samsung
+   * (mesmo algoritmo, hash e salt). Resultado: a senha que já destrava o
+   * arquivo original da Samsung também destrava este aqui.
+   */
+  function injetarProtecaoReal(buffer) {
+    if (typeof JSZip === 'undefined') return Promise.reject(new Error('JSZip não carregou'));
+    var tag = '<sheetProtection algorithmName="' + PROTECAO_OFS.algorithmName + '" hashValue="' + PROTECAO_OFS.hashValue +
+      '" saltValue="' + PROTECAO_OFS.saltValue + '" spinCount="' + PROTECAO_OFS.spinCount + '" sheet="1" objects="1" scenarios="1"/>';
+    return JSZip.loadAsync(buffer).then(function (zip) {
+      return zip.file('xl/worksheets/sheet1.xml').async('string').then(function (xml) {
+        var novoXml = xml.replace('</sheetData>', '</sheetData>' + tag);
+        zip.file('xl/worksheets/sheet1.xml', novoXml);
+        return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      });
+    });
+  }
+
+  function exportarOfs() {
+    if (!selecionados.size) { toast('Selecione ao menos um pedido', 'err'); return; }
+    var config = obterConfigUnidadeAtual();
+    if (!config.codigoAsc) {
+      toast('Configure o Código ASC dessa unidade primeiro (menu do usuário → Gerenciar unidades)', 'err');
+      return;
+    }
+    var linhas = montarLinhasOfs(config);
+    if (!linhas.length) {
+      toast('Nenhuma peça (PN) encontrada nos pedidos selecionados', 'err');
+      return;
+    }
+    gerarArquivoExcelOfs(linhas);
+  }
+
+  el.bulkExportarOfs.onclick = exportarOfs;
+
 
   // -------- Tags de Peças --------
   var pecasTags = [];
