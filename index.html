@@ -1907,7 +1907,30 @@
   }
 
   // -------- Exportar planilha OFS (Excel) --------
-  var COLUNAS_OFS = ['ASC_CODE', 'PN', 'OFS_Proposal', 'DMD-3', 'DMD-2', 'DMD-1', 'M0_Fcst', 'Stock', 'MIL_days', 'ROP_Days', 'MIL_Qty', 'ROP_Qty', 'Sugest.Adic', 'Qtd Aceita', 'Remarks', 'Categoria'];
+  // Estilo extraído célula a célula do arquivo real da Samsung: fonte, cor de
+  // fundo (resolvida a partir das cores do tema do arquivo original), bordas,
+  // alinhamento e formato numérico de cada coluna.
+  var DEFINICAO_COLUNAS_OFS = [
+    { nome: 'ASC_CODE',     largura: 11.78, numFmt: 'General',  headerAlign: null,     headerValign: 'top', dataAlign: 'right' },
+    { nome: 'PN',           largura: 20.78, numFmt: 'General',  headerAlign: null,     headerValign: 'top', dataAlign: null },
+    { nome: 'OFS_Proposal', largura: 12.78, numFmt: '#,##0',    headerAlign: null,     headerValign: 'top', dataAlign: 'right' },
+    { nome: 'DMD-3',        largura: 8.78,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'DMD-2',        largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'DMD-1',        largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'M0_Fcst',      largura: null,  numFmt: '#,##0.0',  headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'Stock',        largura: null,  numFmt: '#,##0',    headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'MIL_days',     largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'ROP_Days',     largura: null,  numFmt: '#,##0',    headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'MIL_Qty',      largura: null,  numFmt: '#,##0.0',  headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'ROP_Qty',      largura: null,  numFmt: '#,##0.0',  headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'Sugest.Adic',  largura: 14.78, numFmt: 'General',  headerAlign: 'center', dataAlign: 'center', cor: 'FFFFFF00' },
+    { nome: 'Qtd Aceita',   largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center', cor: 'FFC6E0B4' },
+    { nome: 'Remarks',      largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center' },
+    { nome: 'Categoria',    largura: null,  numFmt: 'General',  headerAlign: 'center', dataAlign: 'center' }
+  ];
+  var COLUNAS_OFS = DEFINICAO_COLUNAS_OFS.map(function (d) { return d.nome; });
+  var COR_FUNDO_PADRAO_OFS = 'FFD9D9D9';
+  var BORDA_FINA_OFS = { style: 'thin', color: { argb: 'FF000000' } };
   var MAPA_CATEGORIA_OFS = { 'Celular': 'H.H.P', 'Tablet': 'TAB', 'Relógio': 'WATCH', 'Fones': 'AUDIO' };
 
   // Hash de proteção extraído de um arquivo real da Samsung (Sheet Protection).
@@ -2014,6 +2037,13 @@
     });
   }
 
+  function construirAlinhamento(horizontal, vertical) {
+    var obj = {};
+    if (horizontal) obj.horizontal = horizontal;
+    if (vertical) obj.vertical = vertical;
+    return obj;
+  }
+
   function gerarArquivoExcelOfs(linhas) {
     if (typeof ExcelJS === 'undefined') {
       toast('Biblioteca de Excel não carregou. Verifique sua conexão e recarregue a página.', 'err');
@@ -2023,8 +2053,13 @@
     var ws = wb.addWorksheet('Sheet1');
 
     var headerRow = ws.addRow(COLUNAS_OFS);
-    headerRow.eachCell(function (cell) {
-      cell.font = { bold: true };
+    headerRow.eachCell(function (cell, colNumero) {
+      var def = DEFINICAO_COLUNAS_OFS[colNumero - 1];
+      cell.font = { name: 'Calibri', size: 11, bold: true };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: def.cor || COR_FUNDO_PADRAO_OFS } };
+      cell.border = { top: BORDA_FINA_OFS, bottom: BORDA_FINA_OFS, left: BORDA_FINA_OFS, right: BORDA_FINA_OFS };
+      cell.alignment = construirAlinhamento(def.headerAlign, def.headerValign);
+      cell.numFmt = def.numFmt;
       cell.protection = { locked: true };
     });
 
@@ -2032,16 +2067,18 @@
       var valores = COLUNAS_OFS.map(function (c) { return linha[c] !== undefined ? linha[c] : ''; });
       var row = ws.addRow(valores);
       row.eachCell(function (cell, colNumero) {
-        var nomeCol = COLUNAS_OFS[colNumero - 1];
-        cell.protection = { locked: nomeCol !== 'Qtd Aceita' };
-        if (nomeCol === 'Sugest.Adic') {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
-        }
+        var def = DEFINICAO_COLUNAS_OFS[colNumero - 1];
+        cell.font = { name: 'Calibri', size: 11, bold: false };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: def.cor || COR_FUNDO_PADRAO_OFS } };
+        cell.border = { top: BORDA_FINA_OFS, bottom: BORDA_FINA_OFS, left: BORDA_FINA_OFS, right: BORDA_FINA_OFS };
+        cell.alignment = construirAlinhamento(def.dataAlign, null);
+        cell.numFmt = def.numFmt;
+        cell.protection = { locked: def.nome !== 'Qtd Aceita' };
       });
     });
 
-    COLUNAS_OFS.forEach(function (nomeCol, i) {
-      ws.getColumn(i + 1).width = Math.max(11, nomeCol.length + 2);
+    DEFINICAO_COLUNAS_OFS.forEach(function (def, i) {
+      ws.getColumn(i + 1).width = def.largura || 8.43;
     });
 
     wb.xlsx.writeBuffer().then(function (buffer) {
