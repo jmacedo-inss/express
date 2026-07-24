@@ -139,6 +139,12 @@
 }
 #pedidosApp .btn-clear svg { width: 1em; height: 1em; flex-shrink:0; }
 #pedidosApp .btn-clear:hover { border-color: var(--danger); color: var(--danger); }
+#pedidosApp .bulk-select {
+  height: 2.3em; padding: 0 1.7em 0 0.7em; border-radius: 0.55em; background: var(--panel);
+  border: 1px solid var(--border); font-size: 0.82em; font-weight:600; color: var(--text-dim); cursor:pointer;
+  flex-shrink: 0; transition: border-color .15s ease;
+}
+#pedidosApp .bulk-select:hover { border-color: var(--accent); }
 #pedidosApp .btn-primary {
   margin-left: auto; flex-shrink: 0; padding: 0.55em 1.1em; font-family: var(--font-display); font-weight:700;
   font-size: 0.88em; letter-spacing:0.01em; background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -590,6 +596,20 @@
     <section class="bulk-bar fade-toggle fechado" id="bulkBar">
       <span id="bulkCount">0 selecionados</span>
       <button class="btn-clear" id="bulkDesmarcar">Cancelar seleção</button>
+      <select class="bulk-select" id="bulkStatusSelect">
+        <option value="">Alterar status…</option>
+        <option value="Pendente">Pendente</option>
+        <option value="Pedido criado">Pedido criado</option>
+        <option value="Q&A Criado">Q&amp;A Criado</option>
+        <option value="Peças entregues">Peças entregues</option>
+      </select>
+      <select class="bulk-select" id="bulkPagamentoSelect">
+        <option value="">Alterar pagamento…</option>
+        <option value="---">---</option>
+        <option value="Não pago">Não pago</option>
+        <option value="Pago parcialmente">Pago parcialmente</option>
+        <option value="Pago">Pago</option>
+      </select>
       <button class="btn-clear" id="bulkExportarOfs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>Exportar OFS (Excel)</button>
       <button class="btn-danger-solid" id="bulkExcluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>Excluir selecionados</button>
     </section>
@@ -889,7 +909,7 @@
   var el = {};
   ['statusLabel','btnRefresh','btnConfig','statTotal','statPendente','statAndamento','statEntregue',
    'filtroBusca','filtroTipo','filtroStatus','filtroPagamento','btnLimparFiltros','btnNovo','tbody','emptyState',
-   'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir','bulkExportarOfs',
+   'checkTodos','bulkBar','bulkCount','bulkDesmarcar','bulkExcluir','bulkExportarOfs','bulkStatusSelect','bulkPagamentoSelect',
    'modalPedido','fecharModalPedido','modalTitulo','fData','fNome','fWhatsapp','fTipo','tipoIcone','fSku',
    'pecasTagWrap','pecasChips','fPecasInput',
    'fGarantia','fPedido','fPedidoWrap','fStatus','fPagamento','fValorPago','fValorPagoWrap',
@@ -1905,6 +1925,37 @@
       } else toast('Não foi possível excluir os pedidos selecionados', 'err');
     });
   }
+
+  function aplicarAlteracaoEmMassa(dadosAlteracao, mensagemSucesso, seletorParaResetar) {
+    var ids = Array.from(selecionados);
+    if (!ids.length) { seletorParaResetar.value = ''; return; }
+    seletorParaResetar.disabled = true;
+    apiPost({ action: 'updateMany', ids: ids, data: dadosAlteracao }).then(function (res) {
+      seletorParaResetar.disabled = false;
+      seletorParaResetar.value = '';
+      if (res.ok) {
+        ids.forEach(function (id) {
+          var pedido = pedidos.find(function (p) { return p.ID === id; });
+          if (pedido) Object.assign(pedido, dadosAlteracao);
+        });
+        renderizar();
+        toast(mensagemSucesso, 'ok');
+      } else {
+        toast(res.error || 'Não foi possível atualizar os pedidos selecionados', 'err');
+      }
+    });
+  }
+
+  el.bulkStatusSelect.addEventListener('change', function () {
+    var novoValor = el.bulkStatusSelect.value;
+    if (!novoValor) return;
+    aplicarAlteracaoEmMassa({ Status: novoValor }, 'Status atualizado em ' + selecionados.size + ' pedido(s)', el.bulkStatusSelect);
+  });
+  el.bulkPagamentoSelect.addEventListener('change', function () {
+    var novoValor = el.bulkPagamentoSelect.value;
+    if (!novoValor) return;
+    aplicarAlteracaoEmMassa({ Pagamento: novoValor }, 'Pagamento atualizado em ' + selecionados.size + ' pedido(s)', el.bulkPagamentoSelect);
+  });
 
   // -------- Exportar planilha OFS (Excel) --------
   // Estilo extraído célula a célula do arquivo real da Samsung: fonte, cor de
